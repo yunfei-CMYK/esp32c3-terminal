@@ -1,4 +1,10 @@
 dependencies:
+  espressif/es8311:
+    component_hash: eacbe7cb7f6993eb0f439121a56663cdfbf95925e7ddf5d2ed5aa640bed476fd
+    source:
+      storage_url: file:///E:/Software/Espressif/registry
+      type: service
+    version: 1.0.0
   espressif/esp_lcd_touch:
     component_hash: d4d8f2dc33205797169a97a02e0d89a8982f59fe0509129b54422052b8522f59
     source:
@@ -22,6 +28,6 @@ dependencies:
       storage_url: file:///E:/Software/Espressif/registry
       type: service
     version: 8.3.11
-manifest_hash: 17e55fd0893f98b6b12ecec5ecfffc0d71ceaa89f65f26bf975f0362833fd356
+manifest_hash: 800661f7347229110c1e85445cb2c72b99c72ab3b6f752e0a849d147cc162bdd
 target: esp32c3
 version: 1.0.0

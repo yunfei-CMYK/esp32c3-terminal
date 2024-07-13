@@ -9,6 +9,8 @@ void ui_weatherpage_screen_init(void)
 {
     ui_weatherpage = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_weatherpage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_weatherpage, lv_color_hex(0x5295B4), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_weatherpage, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Label12 = lv_label_create(ui_weatherpage);
     lv_obj_set_width(ui_Label12, LV_SIZE_CONTENT);   /// 1

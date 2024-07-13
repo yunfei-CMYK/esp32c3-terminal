@@ -15,7 +15,6 @@ int strength = 0;
 
 lv_timer_t *my_lv_timer;
 
-
 void game_update_cb(lv_timer_t *timer)
 {
     if (strength != 0) // 发现有手指按下屏幕
@@ -107,13 +106,6 @@ void ui_gamepage_screen_init(void)
 
     // 创建一个lv_timer 用于更新圆球的坐标
     my_lv_timer = lv_timer_create(game_update_cb, 50, NULL); //
-
-    // ui_Label13 = lv_label_create(ui_gamepage);
-    // lv_obj_set_width(ui_Label13, LV_SIZE_CONTENT);   /// 1
-    // lv_obj_set_height(ui_Label13, LV_SIZE_CONTENT);    /// 1
-    // lv_obj_set_align(ui_Label13, LV_ALIGN_CENTER);
-    // lv_label_set_text(ui_Label13, "游戏");
-    // lv_obj_set_style_text_font(ui_Label13, &ui_font_Terminal, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_gamepage, ui_event_gamepage, LV_EVENT_ALL, NULL);
 }

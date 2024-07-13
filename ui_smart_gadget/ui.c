@@ -18,6 +18,8 @@ lv_obj_t * ui_MainTitle;
 void ui_event_Entry(lv_event_t * e);
 lv_obj_t * ui_Entry;
 lv_obj_t * ui_Label3;
+void ui_event_wifibtn(lv_event_t * e);
+lv_obj_t * ui_wifibtn;
 
 
 // SCREEN: ui_Mainpage
@@ -26,22 +28,22 @@ void ui_event_Mainpage(lv_event_t * e);
 lv_obj_t * ui_Mainpage;
 void ui_event_weather(lv_event_t * e);
 lv_obj_t * ui_weather;
-lv_obj_t * ui_Image2;
+lv_obj_t * ui_weatherpng;
 void ui_event_game(lv_event_t * e);
 lv_obj_t * ui_game;
-lv_obj_t * ui_Image3;
-void ui_event_voice(lv_event_t * e);
-lv_obj_t * ui_voice;
-lv_obj_t * ui_Image4;
+lv_obj_t * ui_gamepng;
+void ui_event_port(lv_event_t * e);
+lv_obj_t * ui_port;
+lv_obj_t * ui_portpng;
 void ui_event_mpu(lv_event_t * e);
 lv_obj_t * ui_mpu;
-lv_obj_t * ui_Image5;
+lv_obj_t * ui_mpupng;
 void ui_event_campass(lv_event_t * e);
 lv_obj_t * ui_campass;
-lv_obj_t * ui_Image7;
+lv_obj_t * ui_campasspng;
 void ui_event_setting(lv_event_t * e);
 lv_obj_t * ui_setting;
-lv_obj_t * ui_Image6;
+lv_obj_t * ui_setpng;
 lv_obj_t * ui_weatherlabel;
 lv_obj_t * ui_settinglabel;
 lv_obj_t * ui_campasslabel;
@@ -65,10 +67,10 @@ lv_obj_t * ui_gamepage;
 lv_obj_t * ui_Label13;
 
 
-// SCREEN: ui_voicepage
-void ui_voicepage_screen_init(void);
-void ui_event_voicepage(lv_event_t * e);
-lv_obj_t * ui_voicepage;
+// SCREEN: ui_portpage
+void ui_portpage_screen_init(void);
+void ui_event_portpage(lv_event_t * e);
+lv_obj_t * ui_portpage;
 lv_obj_t * ui_Label14;
 
 
@@ -91,6 +93,15 @@ void ui_settingpage_screen_init(void);
 void ui_event_settingpage(lv_event_t * e);
 lv_obj_t * ui_settingpage;
 lv_obj_t * ui_Label17;
+lv_obj_t * ui_Container1;
+lv_obj_t * ui_Label1;
+
+
+// SCREEN: ui_wifipage
+void ui_wifipage_screen_init(void);
+void ui_event_wifipage(lv_event_t * e);
+lv_obj_t * ui_wifipage;
+lv_obj_t * ui_Label2;
 lv_obj_t * ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
@@ -153,6 +164,7 @@ void ui_event_Startpage(lv_event_t * e)
         showanim_Animation(ui_Startpage, 50);
         showanim_Animation(ui_MainTitle, 100);
         showanim_Animation(ui_Entry, 200);
+        showanim_Animation(ui_wifibtn, 200);
     }
 }
 void ui_event_Entry(lv_event_t * e)
@@ -163,17 +175,25 @@ void ui_event_Entry(lv_event_t * e)
         _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Mainpage_screen_init);
     }
 }
+void ui_event_wifibtn(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        _ui_screen_change(&ui_wifipage, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_wifipage_screen_init);
+    }
+}
 void ui_event_Mainpage(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_LONG_PRESSED) {
-        _ui_screen_change(&ui_Startpage, LV_SCR_LOAD_ANIM_NONE, 0, 0, &ui_Startpage_screen_init);
+        _ui_screen_change(&ui_Startpage, LV_SCR_LOAD_ANIM_NONE, 500, 0, &ui_Startpage_screen_init);
     }
     if(event_code == LV_EVENT_SCREEN_LOAD_START) {
         showanim_Animation(ui_weather, 200);
         showanim_Animation(ui_game, 200);
-        showanim_Animation(ui_voice, 200);
+        showanim_Animation(ui_port, 200);
         showanim_Animation(ui_mpu, 400);
         showanim_Animation(ui_campass, 400);
         showanim_Animation(ui_setting, 400);
@@ -202,12 +222,12 @@ void ui_event_game(lv_event_t * e)
         _ui_screen_change(&ui_gamepage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_gamepage_screen_init);
     }
 }
-void ui_event_voice(lv_event_t * e)
+void ui_event_port(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_voicepage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_voicepage_screen_init);
+        _ui_screen_change(&ui_portpage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_portpage_screen_init);
     }
 }
 void ui_event_mpu(lv_event_t * e)
@@ -248,12 +268,11 @@ void ui_event_gamepage(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
-        // lv_timer_del(my_lv_timer);
         lv_indev_wait_release(lv_indev_get_act());
         _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_Mainpage_screen_init);
     }
 }
-void ui_event_voicepage(lv_event_t * e)
+void ui_event_portpage(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
@@ -275,18 +294,26 @@ void ui_event_campasspage(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
-    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
-        lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_Mainpage_screen_init);
+    if(event_code == LV_EVENT_LONG_PRESSED){
+        _ui_screen_change(&ui_Mainpage,LV_SCR_LOAD_ANIM_NONE, 500,0,&ui_Mainpage_screen_init);
     }
 }
 void ui_event_settingpage(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_TOP) {
+        lv_indev_wait_release(lv_indev_get_act());
+        _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_Mainpage_screen_init);
+    }
+}
+void ui_event_wifipage(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_Mainpage_screen_init);
+        _ui_screen_change(&ui_Startpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_Startpage_screen_init);
     }
 }
 
@@ -302,10 +329,11 @@ void ui_init(void)
     ui_Mainpage_screen_init();
     ui_weatherpage_screen_init();
     ui_gamepage_screen_init();
-    ui_voicepage_screen_init();
+    ui_portpage_screen_init();
     ui_mpupage_screen_init();
     ui_campasspage_screen_init();
     ui_settingpage_screen_init();
+    ui_wifipage_screen_init();
     ui____initial_actions0 = lv_obj_create(NULL);
     lv_disp_load_scr(ui_Startpage);
 }

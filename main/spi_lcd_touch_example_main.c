@@ -19,6 +19,8 @@
 #include "myi2c.h"
 #include "lv_demos.h"
 
+#include "driver/ledc.h"
+
 #include <time.h>
 #include <sys/time.h>
 
@@ -59,7 +61,7 @@ static const char *TAG = "example";
 
 esp_lcd_touch_handle_t tp = NULL;
 
-extern void example_lvgl_demo_ui(lv_disp_t *disp);
+float bg_duty;  //液晶屏背光占空比   范围0-100
 
 static bool example_notify_lvgl_flush_ready(esp_lcd_panel_io_handle_t panel_io, esp_lcd_panel_io_event_data_t *edata, void *user_ctx)
 {
@@ -77,67 +79,6 @@ static void example_lvgl_flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_
     int offsety2 = area->y2;
     // copy a buffer's content to a specific area of the display
     esp_lcd_panel_draw_bitmap(panel_handle, offsetx1, offsety1, offsetx2 + 1, offsety2 + 1, color_map);
-}
-
-/* Rotate display and touch, when rotated screen in LVGL. Called when driver parameters are updated. */
-static void example_lvgl_port_update_callback(lv_disp_drv_t *drv)
-{
-    esp_lcd_panel_handle_t panel_handle = (esp_lcd_panel_handle_t)drv->user_data;
-
-    switch (drv->rotated)
-    {
-    case LV_DISP_ROT_270:
-        // Rotate LCD display
-        esp_lcd_panel_swap_xy(panel_handle, false);
-        esp_lcd_panel_mirror(panel_handle, false, false);
-#if CONFIG_EXAMPLE_LCD_TOUCH_ENABLED
-        // Rotate LCD touch
-        esp_lcd_touch_set_mirror_y(tp, true);
-        esp_lcd_touch_set_mirror_x(tp, false);
-#endif
-        break;
-    case LV_DISP_ROT_NONE:
-        // Rotate LCD display
-        esp_lcd_panel_swap_xy(panel_handle, true);
-        esp_lcd_panel_mirror(panel_handle, false, true);
-#if CONFIG_EXAMPLE_LCD_TOUCH_ENABLED
-        // Rotate LCD touch
-        esp_lcd_touch_set_mirror_y(tp, true);
-        esp_lcd_touch_set_mirror_x(tp, false);
-#endif
-        break;
-    case LV_DISP_ROT_90:
-        // Rotate LCD display
-        esp_lcd_panel_swap_xy(panel_handle, false);
-        esp_lcd_panel_mirror(panel_handle, true, true);
-#if CONFIG_EXAMPLE_LCD_TOUCH_ENABLED
-        // Rotate LCD touch
-        esp_lcd_touch_set_mirror_y(tp, true);
-        esp_lcd_touch_set_mirror_x(tp, false);
-#endif
-        break;
-    case LV_DISP_ROT_180:
-        // Rotate LCD display
-        esp_lcd_panel_swap_xy(panel_handle, true);
-        esp_lcd_panel_mirror(panel_handle, true, false);
-#if CONFIG_EXAMPLE_LCD_TOUCH_ENABLED
-        // Rotate LCD touch
-        esp_lcd_touch_set_mirror_y(tp, true);
-        esp_lcd_touch_set_mirror_x(tp, false);
-#endif
-        break;
-    }
-}
-
-static void main_page_task(void *pvParameters)
-{
-    ui_init();
-    while (1)
-    {
-        vTaskDelay(pdMS_TO_TICKS(1000));
-    }
-
-    vTaskDelete(NULL);
 }
 
 static void example_lvgl_touch_cb(lv_indev_drv_t *drv, lv_indev_data_t *data)
@@ -167,10 +108,46 @@ static void example_lvgl_touch_cb(lv_indev_drv_t *drv, lv_indev_data_t *data)
     }
 }
 
+// LCD背光调节初始化函数
+static void lcd_brightness_init(void)
+{
+    // Prepare and then apply the LEDC PWM timer configuration
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .timer_num = LEDC_TIMER_0,
+        .duty_resolution = LEDC_TIMER_13_BIT, // Set duty resolution to 13 bits,
+        .freq_hz = 5000,                      // Frequency in Hertz. Set frequency at 5 kHz
+        .clk_cfg = LEDC_AUTO_CLK};
+    ESP_ERROR_CHECK(ledc_timer_config(&ledc_timer));
+
+    // Prepare and then apply the LEDC PWM channel configuration
+    ledc_channel_config_t ledc_channel = {
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .channel = LEDC_CHANNEL_0,
+        .timer_sel = LEDC_TIMER_0,
+        .intr_type = LEDC_INTR_DISABLE,
+        .gpio_num = EXAMPLE_PIN_NUM_BK_LIGHT,
+        .duty = 0, // Set duty
+        .hpoint = 0};
+    ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
+}
+
+
 static void example_increase_lvgl_tick(void *arg)
 {
     /* Tell LVGL how many milliseconds has elapsed */
     lv_tick_inc(EXAMPLE_LVGL_TICK_PERIOD_MS);
+}
+
+static void main_page_task(void *pvParameters)
+{
+    ui_init();
+    while (1)
+    {
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+
+    vTaskDelete(NULL);
 }
 
 void app_main(void)
@@ -220,29 +197,20 @@ void app_main(void)
         .rgb_ele_order = LCD_RGB_ELEMENT_ORDER_RGB,
         .bits_per_pixel = 16,
     };
-#if CONFIG_EXAMPLE_LCD_CONTROLLER_ILI9341
-    ESP_LOGI(TAG, "Install ILI9341 panel driver");
-    ESP_ERROR_CHECK(esp_lcd_new_panel_ili9341(io_handle, &panel_config, &panel_handle));
-#elif CONFIG_EXAMPLE_LCD_CONTROLLER_GC9A01
-    ESP_LOGI(TAG, "Install GC9A01 panel driver");
-    ESP_ERROR_CHECK(esp_lcd_new_panel_gc9a01(io_handle, &panel_config, &panel_handle));
-#elif CONFIG_EXAMPLE_LCD_CONTROLLER_ST7789
+
     ESP_LOGI(TAG, "Install ST7789 panel driver");
     ESP_ERROR_CHECK(esp_lcd_new_panel_st7789(io_handle, &panel_config, &panel_handle));
-#endif
+
 
     ESP_ERROR_CHECK(esp_lcd_panel_reset(panel_handle));
     ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
-#if CONFIG_EXAMPLE_LCD_CONTROLLER_GC9A01
-    ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_handle, true));
-#endif
     ESP_ERROR_CHECK(esp_lcd_panel_swap_xy(panel_handle, true));
     ESP_ERROR_CHECK(esp_lcd_panel_mirror(panel_handle, false, true));
     ESP_ERROR_CHECK(esp_lcd_panel_invert_color(panel_handle, true));
     // user can flush pre-defined pattern to the screen before we turn on the screen or backlight
-    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
+    // ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
 
-#if CONFIG_EXAMPLE_LCD_TOUCH_ENABLED
+
     esp_lcd_panel_io_handle_t tp_io_handle = NULL;
     esp_lcd_panel_io_i2c_config_t tp_io_config = ESP_LCD_TOUCH_IO_I2C_FT5x06_CONFIG();
 
@@ -258,15 +226,10 @@ void app_main(void)
         },
     };
 
-#if CONFIG_EXAMPLE_LCD_TOUCH_CONTROLLER_STMPE610
-    ESP_LOGI(TAG, "Initialize touch controller STMPE610");
-    ESP_ERROR_CHECK(esp_lcd_touch_new_spi_stmpe610(tp_io_handle, &tp_cfg, &tp));
-#endif // CONFIG_EXAMPLE_LCD_TOUCH_CONTROLLER_STMPE610
-#if CONFIG_EXAMPLE_LCD_TOUCH_CONTROLLER_FT6336
+
     ESP_LOGI(TAG, "Initialize touch controller FT6336");
     ESP_ERROR_CHECK(esp_lcd_touch_new_i2c_ft5x06(tp_io_handle, &tp_cfg, &tp));
-#endif // CONFIG_EXAMPLE_LCD_TOUCH_CONTROLLER_FT6336
-#endif // CONFIG_EXAMPLE_LCD_TOUCH_ENABLED
+
 
     ESP_LOGI(TAG, "Turn on LCD backlight");
     gpio_set_level(EXAMPLE_PIN_NUM_BK_LIGHT, EXAMPLE_LCD_BK_LIGHT_ON_LEVEL);
@@ -287,7 +250,7 @@ void app_main(void)
     disp_drv.hor_res = EXAMPLE_LCD_H_RES;
     disp_drv.ver_res = EXAMPLE_LCD_V_RES;
     disp_drv.flush_cb = example_lvgl_flush_cb;
-    disp_drv.drv_update_cb = example_lvgl_port_update_callback;
+    // disp_drv.drv_update_cb = example_lvgl_port_update_callback;
     disp_drv.draw_buf = &disp_buf;
     disp_drv.user_data = panel_handle;
     lv_disp_t *disp = lv_disp_drv_register(&disp_drv);
@@ -301,7 +264,7 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_timer_create(&lvgl_tick_timer_args, &lvgl_tick_timer));
     ESP_ERROR_CHECK(esp_timer_start_periodic(lvgl_tick_timer, EXAMPLE_LVGL_TICK_PERIOD_MS * 1000));
 
-#if CONFIG_EXAMPLE_LCD_TOUCH_ENABLED
+
     static lv_indev_drv_t indev_drv; // Input device driver (Touch)
     lv_indev_drv_init(&indev_drv);
     indev_drv.type = LV_INDEV_TYPE_POINTER;
@@ -310,15 +273,16 @@ void app_main(void)
     indev_drv.user_data = tp;
 
     lv_indev_drv_register(&indev_drv);
-#endif
 
-    ESP_LOGI(TAG, "Display LVGL Meter Widget");
-    // example_lvgl_demo_ui(disp);
-    // lv_demo_benchmark();
-    // lv_demo_keypad_encoder();
-    // lv_demo_stress();
-    //  lv_demo_widgets();
-    // lv_demo_music();
+    qmi8658c_init();  // 姿态传感器初始化
+    qmc5883l_init();  // 方位角传感器初始化
+
+    lcd_brightness_init();
+    bg_duty = 0.5;
+    ESP_ERROR_CHECK(ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 8191 * (1 - bg_duty)));
+    ESP_ERROR_CHECK(ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0));
+    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
+
     // ui_init();
     xTaskCreate(main_page_task, "main_page_task", 8192, NULL, 5, NULL);
     while (1)

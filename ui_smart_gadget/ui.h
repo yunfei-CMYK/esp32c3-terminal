@@ -15,6 +15,10 @@ extern "C" {
 #include "ui_helpers.h"
 #include "ui_events.h"
 
+#include "../main/qmi8658c.h"
+#include "../main/qmc5883l.h"
+#include "math.h"
+
 void showanim_Animation(lv_obj_t * TargetObject, int delay);
 // SCREEN: ui_Startpage
 void ui_Startpage_screen_init(void);
@@ -24,28 +28,30 @@ extern lv_obj_t * ui_MainTitle;
 void ui_event_Entry(lv_event_t * e);
 extern lv_obj_t * ui_Entry;
 extern lv_obj_t * ui_Label3;
+void ui_event_wifibtn(lv_event_t * e);
+extern lv_obj_t * ui_wifibtn;
 // SCREEN: ui_Mainpage
 void ui_Mainpage_screen_init(void);
 void ui_event_Mainpage(lv_event_t * e);
 extern lv_obj_t * ui_Mainpage;
 void ui_event_weather(lv_event_t * e);
 extern lv_obj_t * ui_weather;
-extern lv_obj_t * ui_Image2;
+extern lv_obj_t * ui_weatherpng;
 void ui_event_game(lv_event_t * e);
 extern lv_obj_t * ui_game;
-extern lv_obj_t * ui_Image3;
-void ui_event_voice(lv_event_t * e);
-extern lv_obj_t * ui_voice;
-extern lv_obj_t * ui_Image4;
+extern lv_obj_t * ui_gamepng;
+void ui_event_port(lv_event_t * e);
+extern lv_obj_t * ui_port;
+extern lv_obj_t * ui_portpng;
 void ui_event_mpu(lv_event_t * e);
 extern lv_obj_t * ui_mpu;
-extern lv_obj_t * ui_Image5;
+extern lv_obj_t * ui_mpupng;
 void ui_event_campass(lv_event_t * e);
 extern lv_obj_t * ui_campass;
-extern lv_obj_t * ui_Image7;
+extern lv_obj_t * ui_campasspng;
 void ui_event_setting(lv_event_t * e);
 extern lv_obj_t * ui_setting;
-extern lv_obj_t * ui_Image6;
+extern lv_obj_t * ui_setpng;
 extern lv_obj_t * ui_weatherlabel;
 extern lv_obj_t * ui_settinglabel;
 extern lv_obj_t * ui_campasslabel;
@@ -63,10 +69,10 @@ void ui_gamepage_screen_init(void);
 void ui_event_gamepage(lv_event_t * e);
 extern lv_obj_t * ui_gamepage;
 extern lv_obj_t * ui_Label13;
-// SCREEN: ui_voicepage
-void ui_voicepage_screen_init(void);
-void ui_event_voicepage(lv_event_t * e);
-extern lv_obj_t * ui_voicepage;
+// SCREEN: ui_portpage
+void ui_portpage_screen_init(void);
+void ui_event_portpage(lv_event_t * e);
+extern lv_obj_t * ui_portpage;
 extern lv_obj_t * ui_Label14;
 // SCREEN: ui_mpupage
 void ui_mpupage_screen_init(void);
@@ -83,23 +89,32 @@ void ui_settingpage_screen_init(void);
 void ui_event_settingpage(lv_event_t * e);
 extern lv_obj_t * ui_settingpage;
 extern lv_obj_t * ui_Label17;
+extern lv_obj_t * ui_Container1;
+extern lv_obj_t * ui_Label1;
+// SCREEN: ui_wifipage
+void ui_wifipage_screen_init(void);
+void ui_event_wifipage(lv_event_t * e);
+extern lv_obj_t * ui_wifipage;
+extern lv_obj_t * ui_Label2;
 extern lv_obj_t * ui____initial_actions0;
 
-extern lv_timer_t * my_lv_timer;
+
 extern int strength;
+extern float bg_duty;
+extern lv_timer_t *my_lv_timer;
 
-
+LV_IMG_DECLARE(ui_img_wifi_png);    // assets/Wifi.png
 LV_IMG_DECLARE(ui_img_944254084);    // assets/天气.png
 LV_IMG_DECLARE(ui_img_227306801);    // assets/游戏手柄.png
-LV_IMG_DECLARE(ui_img_988448286);    // assets/麦克风.png
+LV_IMG_DECLARE(ui_img_2114266571);    // assets/串口监视器.png
 LV_IMG_DECLARE(ui_img_613467726);    // assets/旋转.png
 LV_IMG_DECLARE(ui_img_499049799);    // assets/陀螺仪完整.png
 LV_IMG_DECLARE(ui_img_1887403499);    // assets/设置.png
 
 
 
-LV_FONT_DECLARE(ui_font_Terminal);
 LV_FONT_DECLARE(ui_font_Terminal22);
+LV_FONT_DECLARE(ui_font_Terminal);
 
 
 

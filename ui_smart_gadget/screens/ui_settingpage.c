@@ -4,18 +4,66 @@
 // Project name: Terminal
 
 #include "../ui.h"
+#include "driver/ledc.h"
+
+static void slider_event_cb(lv_event_t * e)
+{
+    int x;
+
+    lv_obj_t * slider = lv_event_get_target(e);
+    lv_slider_set_range(slider, 10, 80);
+    x = lv_slider_get_value(slider);
+    bg_duty = (float)x/100; // 根据滑动条的值计算占空比
+    // 设置占空比
+    ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 8191*(1-bg_duty)); 
+    // 更新背光
+    ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
+}
+
 
 void ui_settingpage_screen_init(void)
 {
     ui_settingpage = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_settingpage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_settingpage, lv_color_hex(0x5295B4), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_settingpage, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Label17 = lv_label_create(ui_settingpage);
     lv_obj_set_width(ui_Label17, LV_SIZE_CONTENT);   /// 1
     lv_obj_set_height(ui_Label17, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label17, -2);
+    lv_obj_set_y(ui_Label17, -100);
     lv_obj_set_align(ui_Label17, LV_ALIGN_CENTER);
     lv_label_set_text(ui_Label17, "设置");
-    lv_obj_set_style_text_font(ui_Label17, &ui_font_Terminal, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label17, &ui_font_Terminal22, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Container1 = lv_obj_create(ui_settingpage);
+    lv_obj_remove_style_all(ui_Container1);
+    lv_obj_set_width(ui_Container1, 100);
+    lv_obj_set_height(ui_Container1, 50);
+    lv_obj_set_x(ui_Container1, 21);
+    lv_obj_set_y(ui_Container1, 51);
+    lv_obj_set_align(ui_Container1, LV_ALIGN_CENTER);
+    lv_obj_clear_flag(ui_Container1, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+
+    ui_Label1 = lv_label_create(ui_settingpage);
+    lv_obj_set_width(ui_Label1, LV_SIZE_CONTENT);   /// 1
+    lv_obj_set_height(ui_Label1, LV_SIZE_CONTENT);    /// 1
+    lv_obj_set_x(ui_Label1, 2);
+    lv_obj_set_y(ui_Label1, -50);
+    lv_obj_set_align(ui_Label1, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_Label1, "滑动调整屏幕亮度");
+    lv_obj_set_style_text_color(ui_Label1, lv_color_hex(0xF0C606), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(ui_Label1, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(ui_Label1, &ui_font_Terminal, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    // 创建一个滑动条
+    lv_obj_t * slider = lv_slider_create(ui_settingpage);
+    lv_slider_set_value(slider, bg_duty*100 , 0);
+    lv_obj_center(slider);
+    lv_obj_set_height(slider, 30);
+    lv_obj_add_event_cb(slider, slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
+
 
     lv_obj_add_event_cb(ui_settingpage, ui_event_settingpage, LV_EVENT_ALL, NULL);
 
