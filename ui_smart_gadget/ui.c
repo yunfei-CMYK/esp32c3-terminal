@@ -101,7 +101,15 @@ lv_obj_t * ui_Label1;
 void ui_wifipage_screen_init(void);
 void ui_event_wifipage(lv_event_t * e);
 lv_obj_t * ui_wifipage;
-lv_obj_t * ui_Label2;
+lv_obj_t * ui_wifititle;
+lv_obj_t * ui_wifiDropdown;
+lv_obj_t * ui_wifiswitch;
+lv_obj_t * ui_usefulwifilabel;
+lv_obj_t * ui_passwordlabel;
+lv_obj_t * ui_passwordTextArea;
+lv_obj_t * ui_linkbtn;
+lv_obj_t * ui_linklabel;
+lv_obj_t * ui_wifiKeyboard;
 lv_obj_t * ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////

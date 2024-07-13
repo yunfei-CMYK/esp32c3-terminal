@@ -17,7 +17,11 @@ extern "C" {
 
 #include "../main/qmi8658c.h"
 #include "../main/qmc5883l.h"
+#include "esp_wifi.h"
+#include "nvs_flash.h"
 #include "math.h"
+#include "esp_log.h"
+#include "esp_event.h"
 
 void showanim_Animation(lv_obj_t * TargetObject, int delay);
 // SCREEN: ui_Startpage
@@ -95,13 +99,22 @@ extern lv_obj_t * ui_Label1;
 void ui_wifipage_screen_init(void);
 void ui_event_wifipage(lv_event_t * e);
 extern lv_obj_t * ui_wifipage;
-extern lv_obj_t * ui_Label2;
+extern lv_obj_t * ui_wifititle;
+extern lv_obj_t * ui_wifiDropdown;
+extern lv_obj_t * ui_wifiswitch;
+extern lv_obj_t * ui_usefulwifilabel;
+extern lv_obj_t * ui_passwordlabel;
+extern lv_obj_t * ui_passwordTextArea;
+extern lv_obj_t * ui_linkbtn;
+extern lv_obj_t * ui_linklabel;
+extern lv_obj_t * ui_wifiKeyboard;
 extern lv_obj_t * ui____initial_actions0;
 
 
 extern int strength;
 extern float bg_duty;
 extern lv_timer_t *my_lv_timer;
+extern bool wifiswitch_flag;
 
 LV_IMG_DECLARE(ui_img_wifi_png);    // assets/Wifi.png
 LV_IMG_DECLARE(ui_img_944254084);    // assets/天气.png

@@ -28,7 +28,10 @@
 
 #include "esp_lcd_touch_ft5x06.h"
 
-static const char *TAG = "example";
+#include "esp_wifi.h"
+#include "nvs_flash.h"
+
+static const char *TAG = "Terminal";
 
 // Using SPI2 in the example
 #define LCD_HOST SPI2_HOST
@@ -58,6 +61,8 @@ static const char *TAG = "example";
 #define EXAMPLE_LCD_PARAM_BITS 8
 
 #define EXAMPLE_LVGL_TICK_PERIOD_MS 2
+
+#define DEFAULT_SCAN_LIST_SIZE 10
 
 esp_lcd_touch_handle_t tp = NULL;
 
@@ -271,6 +276,15 @@ void app_main(void)
     indev_drv.disp = disp;
     indev_drv.read_cb = example_lvgl_touch_cb;
     indev_drv.user_data = tp;
+
+
+    /* wifi init*/
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK( ret );
 
     lv_indev_drv_register(&indev_drv);
 
