@@ -19,11 +19,6 @@ static const char *TAG = "WiFi_Scan";
 
 static void wifi_scan(void)
 {
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-    sta_netif = esp_netif_create_default_wifi_sta();
-    assert(sta_netif);
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -71,6 +66,7 @@ static void switch_cb(lv_event_t *e)
 
         nvs_init();
         wifi_scan();
+        // my_lv_timer = lv_timer_create(wifi_scan, 500, NULL);
     }
     else
     {
@@ -82,6 +78,11 @@ static void switch_cb(lv_event_t *e)
 
 void ui_wifipage_screen_init(void)
 {
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    sta_netif = esp_netif_create_default_wifi_sta();
+    assert(sta_netif);
 
     ui_wifipage = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_wifipage, LV_OBJ_FLAG_SCROLLABLE); /// Flags
@@ -118,7 +119,7 @@ void ui_wifipage_screen_init(void)
     lv_obj_set_x(ui_wifiswitch, -47);
     lv_obj_set_y(ui_wifiswitch, -102);
     lv_obj_set_align(ui_wifiswitch, LV_ALIGN_CENTER);
-    // lv_obj_add_event_cb(ui_wifiswitch, switch_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_add_event_cb(ui_wifiswitch, switch_cb, LV_EVENT_CLICKED, NULL);
 
     ui_usefulwifilabel = lv_label_create(ui_wifipage);
     lv_obj_set_width(ui_usefulwifilabel, LV_SIZE_CONTENT);  /// 1
