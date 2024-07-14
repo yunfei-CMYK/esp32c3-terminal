@@ -5,34 +5,24 @@
 
 #include "../ui.h"
 #include "esp_system.h"
+#include <string.h>
 
-#define DEFAULT_SCAN_LIST_SIZE 20
+#define DEFAULT_SCAN_LIST_SIZE 10
 
 bool wifiswitch_flag = false;
-bool netif_initialized  = false;
-bool event_loop_initialized = false;
+
+esp_netif_t *sta_netif;
 
 static char *ssid_list[DEFAULT_SCAN_LIST_SIZE];
 
 static const char *TAG = "WiFi_Scan";
 
-static void wifi_scan(lv_timer_t *timer)
+static void wifi_scan(void)
 {
-    size_t free_heap_size_before = esp_get_free_heap_size();
-    ESP_LOGI(TAG, "Free heap size before scan: %d",free_heap_size_before);
-    
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-    if (!netif_initialized) {
-        ESP_ERROR_CHECK(esp_netif_init());
-        netif_initialized = true;
-    }
-
-    if (!event_loop_initialized) {
-        ESP_ERROR_CHECK(esp_event_loop_create_default());
-        event_loop_initialized = true;
-    }
-
-    esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
+    sta_netif = esp_netif_create_default_wifi_sta();
     assert(sta_netif);
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -50,46 +40,49 @@ static void wifi_scan(lv_timer_t *timer)
     ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number, ap_info));
     ESP_ERROR_CHECK(esp_wifi_scan_get_ap_num(&ap_count));
     ESP_LOGI(TAG, "Total APs scanned = %u, actual AP number ap_info holds = %u", ap_count, number);
-    
-    lv_dropdown_clear_options(ui_wifiDropdown); // 清空下拉列表
-    
-    
+    // 创建一个包含所有 SSID 并以换行符分隔的字符串
     for (int i = 0; i < number; i++)
     {
         ESP_LOGI(TAG, "SSID \t\t%s", ap_info[i].ssid);
-        ssid_list[i] = (char *)ap_info[i].ssid; 
-        lv_dropdown_set_options(ui_wifiDropdown, ssid_list[i]);
-        
+        ssid_list[i] = (char *)ap_info[i].ssid;
+        lv_dropdown_add_option(ui_wifiDropdown, ssid_list[i], i);
     }
-    size_t free_heap_size_after = esp_get_free_heap_size();
-    ESP_LOGI(TAG, "Free heap size after scan: %d",free_heap_size_after);
 }
 
-static void switch_cb(lv_event_cb_t *e)
+static void nvs_init(void)
 {
-    lv_obj_t *switch_obj = lv_event_get_target(e);
-    bool flag = lv_obj_has_state(switch_obj, LV_STATE_CHECKED);
-    if (flag)
+    // Initialize NVS
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
-        wifiswitch_flag = true;
-        esp_err_t ret = nvs_flash_init();
-        if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
-        {
-            ESP_ERROR_CHECK(nvs_flash_erase());
-            ret = nvs_flash_init();
-        }
-        ESP_ERROR_CHECK(ret);
-        my_lv_timer = lv_timer_create(wifi_scan, 1000, NULL);
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
     }
-    else{
+    ESP_ERROR_CHECK(ret);
+}
+
+static void switch_cb(lv_event_t *e)
+{
+    lv_obj_t *sw = lv_event_get_target(e);
+    if (lv_obj_has_state(sw, LV_STATE_CHECKED))
+    {
+        ESP_LOGI(TAG, "Wifi scan started");
+        wifiswitch_flag = true;
+
+        nvs_init();
+        wifi_scan();
+    }
+    else
+    {
+        ESP_LOGI(TAG, "Wifi scan stopped");
         wifiswitch_flag = false;
         lv_dropdown_clear_options(ui_wifiDropdown);
-        memset(ssid_list, 0, sizeof(ssid_list));
     }
 }
 
 void ui_wifipage_screen_init(void)
 {
+
     ui_wifipage = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_wifipage, LV_OBJ_FLAG_SCROLLABLE); /// Flags
     lv_obj_set_style_bg_color(ui_wifipage, lv_color_hex(0x5295B4), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -113,7 +106,8 @@ void ui_wifipage_screen_init(void)
     lv_obj_set_y(ui_wifiDropdown, -59);
     lv_obj_set_align(ui_wifiDropdown, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_wifiDropdown, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
-    if(!wifiswitch_flag){
+    if (!wifiswitch_flag)
+    {
         lv_dropdown_clear_options(ui_wifiDropdown);
     }
 
@@ -124,7 +118,7 @@ void ui_wifipage_screen_init(void)
     lv_obj_set_x(ui_wifiswitch, -47);
     lv_obj_set_y(ui_wifiswitch, -102);
     lv_obj_set_align(ui_wifiswitch, LV_ALIGN_CENTER);
-    lv_obj_add_event_cb(ui_wifiswitch, switch_cb, LV_EVENT_CLICKED, NULL);
+    // lv_obj_add_event_cb(ui_wifiswitch, switch_cb, LV_EVENT_CLICKED, NULL);
 
     ui_usefulwifilabel = lv_label_create(ui_wifipage);
     lv_obj_set_width(ui_usefulwifilabel, LV_SIZE_CONTENT);  /// 1
@@ -150,7 +144,7 @@ void ui_wifipage_screen_init(void)
 
     ui_passwordTextArea = lv_textarea_create(ui_wifipage);
     lv_obj_set_width(ui_passwordTextArea, 209);
-    lv_obj_set_height(ui_passwordTextArea, 29);
+    lv_obj_set_height(ui_passwordTextArea, 39);
     lv_obj_set_x(ui_passwordTextArea, 29);
     lv_obj_set_y(ui_passwordTextArea, -22);
     lv_obj_set_align(ui_passwordTextArea, LV_ALIGN_CENTER);
@@ -188,5 +182,6 @@ void ui_wifipage_screen_init(void)
     lv_obj_set_style_bg_color(ui_wifiKeyboard, lv_color_hex(0xABD1E3), LV_PART_ITEMS | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_wifiKeyboard, 255, LV_PART_ITEMS | LV_STATE_DEFAULT);
 
+    lv_obj_add_event_cb(ui_wifiKeyboard, ui_event_wifiKeyboard, LV_EVENT_ALL, NULL);
     lv_obj_add_event_cb(ui_wifipage, ui_event_wifipage, LV_EVENT_ALL, NULL);
 }

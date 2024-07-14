@@ -29,7 +29,7 @@
 #include "esp_lcd_touch_ft5x06.h"
 
 #include "esp_wifi.h"
-#include "nvs_flash.h"
+
 
 static const char *TAG = "Terminal";
 
@@ -277,14 +277,6 @@ void app_main(void)
     indev_drv.read_cb = example_lvgl_touch_cb;
     indev_drv.user_data = tp;
 
-
-    /* wifi init*/
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK( ret );
 
     lv_indev_drv_register(&indev_drv);
 

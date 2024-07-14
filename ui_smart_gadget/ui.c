@@ -109,6 +109,7 @@ lv_obj_t * ui_passwordlabel;
 lv_obj_t * ui_passwordTextArea;
 lv_obj_t * ui_linkbtn;
 lv_obj_t * ui_linklabel;
+void ui_event_wifiKeyboard(lv_event_t * e);
 lv_obj_t * ui_wifiKeyboard;
 lv_obj_t * ui____initial_actions0;
 
@@ -324,6 +325,16 @@ void ui_event_wifipage(lv_event_t * e)
         _ui_screen_change(&ui_Startpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_Startpage_screen_init);
     }
 }
+
+void ui_event_wifiKeyboard(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+    if(event_code == LV_EVENT_CLICKED) {
+        _ui_keyboard_set_target(ui_wifiKeyboard,  ui_passwordTextArea);
+    }
+}
+
 
 ///////////////////// SCREENS ////////////////////
 

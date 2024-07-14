@@ -4,7 +4,8 @@
     "idf.flashType": "UART",
     "files.associations": {
         "main.h": "c",
-        "ui.h": "c"
+        "ui.h": "c",
+        "esp_system.h": "c"
     },
     "idf.openOcdConfigs": [
         "board/esp32c3-bridge.cfg"

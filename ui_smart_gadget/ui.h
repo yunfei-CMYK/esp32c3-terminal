@@ -18,10 +18,11 @@ extern "C" {
 #include "../main/qmi8658c.h"
 #include "../main/qmc5883l.h"
 #include "esp_wifi.h"
-#include "nvs_flash.h"
 #include "math.h"
 #include "esp_log.h"
 #include "esp_event.h"
+
+#include "nvs_flash.h"
 
 void showanim_Animation(lv_obj_t * TargetObject, int delay);
 // SCREEN: ui_Startpage
@@ -107,6 +108,7 @@ extern lv_obj_t * ui_passwordlabel;
 extern lv_obj_t * ui_passwordTextArea;
 extern lv_obj_t * ui_linkbtn;
 extern lv_obj_t * ui_linklabel;
+void ui_event_wifiKeyboard(lv_event_t * e);
 extern lv_obj_t * ui_wifiKeyboard;
 extern lv_obj_t * ui____initial_actions0;
 
