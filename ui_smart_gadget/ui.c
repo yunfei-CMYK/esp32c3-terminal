@@ -104,6 +104,7 @@ lv_obj_t * ui_wifipage;
 lv_obj_t * ui_wifititle;
 lv_obj_t * ui_wifiDropdown;
 lv_obj_t * ui_wifiswitch;
+lv_obj_t * ui_wifiled;
 lv_obj_t * ui_usefulwifilabel;
 lv_obj_t * ui_passwordlabel;
 lv_obj_t * ui_passwordTextArea;

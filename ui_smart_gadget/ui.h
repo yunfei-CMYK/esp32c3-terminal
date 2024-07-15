@@ -17,12 +17,23 @@ extern "C" {
 
 #include "../main/qmi8658c.h"
 #include "../main/qmc5883l.h"
+
+#include "esp_system.h"
 #include "esp_wifi.h"
-#include "math.h"
 #include "esp_log.h"
 #include "esp_event.h"
 
+#include "math.h"
+
+#include "string.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/event_groups.h"
+
 #include "nvs_flash.h"
+
+#include "lwip/err.h"
+#include "lwip/sys.h"
 
 void showanim_Animation(lv_obj_t * TargetObject, int delay);
 // SCREEN: ui_Startpage
@@ -103,6 +114,7 @@ extern lv_obj_t * ui_wifipage;
 extern lv_obj_t * ui_wifititle;
 extern lv_obj_t * ui_wifiDropdown;
 extern lv_obj_t * ui_wifiswitch;
+extern lv_obj_t * ui_wifiled;
 extern lv_obj_t * ui_usefulwifilabel;
 extern lv_obj_t * ui_passwordlabel;
 extern lv_obj_t * ui_passwordTextArea;

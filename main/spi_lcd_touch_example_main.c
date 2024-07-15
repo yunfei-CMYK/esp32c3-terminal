@@ -282,6 +282,7 @@ void app_main(void)
 
     qmi8658c_init();  // 姿态传感器初始化
     qmc5883l_init();  // 方位角传感器初始化
+    ESP_LOGI(TAG, "[APP] Free memory: %lu bytes", (unsigned long)esp_get_free_heap_size());
 
     lcd_brightness_init();
     bg_duty = 0.5;

@@ -5,9 +5,17 @@
 
 #include "../ui.h"
 #include "esp_system.h"
-#include <string.h>
 
 #define DEFAULT_SCAN_LIST_SIZE 10
+
+#define ESP_WIFI_MAXIMUM_RETRY 5
+
+#define ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD WIFI_AUTH_WPA_WPA2_PSK
+#define ESP_WIFI_SAE_MODE WPA3_SAE_PWE_BOTH
+#define EXAMPLE_H2E_IDENTIFIER ""
+
+// #define EXAMPLE_ESP_WIFI_SSID "jialongfei"
+// #define EXAMPLE_ESP_WIFI_PASS "19981230"
 
 bool wifiswitch_flag = false;
 
@@ -15,13 +23,20 @@ esp_netif_t *sta_netif;
 
 static char *ssid_list[DEFAULT_SCAN_LIST_SIZE];
 
-static const char *TAG = "WiFi_Scan";
+static EventGroupHandle_t s_wifi_event_group;
+
+#define WIFI_CONNECTED_BIT BIT0
+#define WIFI_FAIL_BIT BIT1
+
+static const char *TAG = "WiFi";
+
+static int s_retry_num = 0;
 
 static void wifi_scan(void)
 {
 
-    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    wifi_init_config_t wifi_cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&wifi_cfg));
 
     uint16_t number = DEFAULT_SCAN_LIST_SIZE;
     wifi_ap_record_t ap_info[DEFAULT_SCAN_LIST_SIZE];
@@ -63,8 +78,8 @@ static void switch_cb(lv_event_t *e)
     {
         ESP_LOGI(TAG, "Wifi scan started");
         wifiswitch_flag = true;
-
         nvs_init();
+        lv_dropdown_clear_options(ui_wifiDropdown);
         wifi_scan();
         // my_lv_timer = lv_timer_create(wifi_scan, 500, NULL);
     }
@@ -72,17 +87,236 @@ static void switch_cb(lv_event_t *e)
     {
         ESP_LOGI(TAG, "Wifi scan stopped");
         wifiswitch_flag = false;
-        lv_dropdown_clear_options(ui_wifiDropdown);
+        lv_led_off(ui_wifiled);
+        esp_wifi_stop();
+        esp_wifi_deinit();
+        // lv_dropdown_clear_options(ui_wifiDropdown);
+        lv_textarea_clear_selection(ui_passwordTextArea);
     }
+}
+
+static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
+{
+    ESP_LOGI(TAG, "Entry WiFi connect event_handler");
+    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
+    {
+        esp_wifi_connect();
+    }
+    else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
+    {
+        if (s_retry_num < ESP_WIFI_MAXIMUM_RETRY)
+        {
+            esp_wifi_connect();
+            s_retry_num++;
+            ESP_LOGI(TAG, "retry to connect to the AP");
+        }
+        else
+        {
+            xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+        }
+        ESP_LOGI(TAG, "connect to the AP fail");
+    }
+    else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
+    {
+        ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
+        ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
+        s_retry_num = 0;
+        xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+    }
+}
+
+// void wifi_connect_sta(const char *name, const char *password)
+// {
+//     s_wifi_event_group = xEventGroupCreate();
+
+//     esp_event_handler_instance_t instance_any_id;
+//     esp_event_handler_instance_t instance_got_ip;
+
+//     ESP_LOGI(TAG, "Registering WiFi event handler...");
+//     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
+//                                                         ESP_EVENT_ANY_ID,
+//                                                         &event_handler,
+//                                                         NULL,
+//                                                         &instance_any_id));
+//     ESP_LOGI(TAG, "Registering IP event handler...");
+//     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
+//                                                         IP_EVENT_STA_GOT_IP,
+//                                                         &event_handler,
+//                                                         NULL,
+//                                                         &instance_got_ip));
+
+//     wifi_config_t wifi_config = {
+//         .sta = {
+//             // .ssid = EXAMPLE_ESP_WIFI_SSID,
+//             // .password = EXAMPLE_ESP_WIFI_PASS,
+//             .ssid = "",
+//             .password = "",
+//             /* Authmode threshold resets to WPA2 as default if password matches WPA2 standards (pasword len => 8).
+//              * If you want to connect the device to deprecated WEP/WPA networks, Please set the threshold value
+//              * to WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK and set the password with length and format matching to
+//              * WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK standards.
+//              */
+//             .threshold.authmode = ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD,
+//             .sae_pwe_h2e = ESP_WIFI_SAE_MODE,
+//             .sae_h2e_identifier = EXAMPLE_H2E_IDENTIFIER,
+//         },
+//     };
+
+//     strncpy((char *)wifi_config.sta.ssid, name, sizeof(wifi_config.sta.ssid));
+//     strncpy((char *)wifi_config.sta.password, password, sizeof(wifi_config.sta.password));
+
+//     ESP_LOGI(TAG, "ssid: %s", wifi_config.sta.ssid);
+//     ESP_LOGI(TAG, "password: %s", wifi_config.sta.password);
+
+//     // ESP_LOGI(TAG, "Setting WiFi mode...");
+//     // ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+
+//     ESP_LOGI(TAG, "Set config ago ssid: %s", wifi_config.sta.ssid);
+//     ESP_LOGI(TAG, "Set config ago password: %s", wifi_config.sta.password);
+
+//     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+
+//     ESP_LOGI(TAG, "Set config after ssid: %s", wifi_config.sta.ssid);
+//     ESP_LOGI(TAG, "Set config after password: %s", wifi_config.sta.password);
+
+//     // ESP_LOGI(TAG,"Starting WiFi...");
+//     // ESP_ERROR_CHECK(esp_wifi_start());
+
+//     ESP_LOGI(TAG, "wifi_init_sta finished.");
+
+//     /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
+//      * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
+//     ESP_LOGI(TAG, "Waiting for WiFi connection...");
+//     EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
+//                                            WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
+//                                            pdFALSE,
+//                                            pdFALSE,
+//                                            pdMS_TO_TICKS(10000));
+
+//     /* xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually
+//      * happened. */
+
+//     if (bits & WIFI_CONNECTED_BIT)
+//     {
+//         ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
+//                  wifi_config.sta.ssid, wifi_config.sta.password);
+//         lv_led_on(ui_wifiled);
+//     }
+//     else if (bits & WIFI_FAIL_BIT)
+//     {
+//         ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
+//                  wifi_config.sta.ssid, wifi_config.sta.password);
+//     }
+//     else
+//     {
+//         ESP_LOGE(TAG, "Timeout waiting for connection");
+//     }
+// }
+
+void wifi_init_sta(const char *name, const char *password)
+{
+    s_wifi_event_group = xEventGroupCreate();
+
+    // ESP_ERROR_CHECK(esp_netif_init());
+
+    // ESP_ERROR_CHECK(esp_event_loop_create_default());
+    // esp_netif_create_default_wifi_sta();
+
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+    esp_event_handler_instance_t instance_any_id;
+    esp_event_handler_instance_t instance_got_ip;
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
+                                                        ESP_EVENT_ANY_ID,
+                                                        &event_handler,
+                                                        NULL,
+                                                        &instance_any_id));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
+                                                        IP_EVENT_STA_GOT_IP,
+                                                        &event_handler,
+                                                        NULL,
+                                                        &instance_got_ip));
+
+    wifi_config_t wifi_config = {
+        .sta = {
+            // .ssid = EXAMPLE_ESP_WIFI_SSID,
+            // .password = EXAMPLE_ESP_WIFI_PASS,
+            .ssid = "",
+            .password = "",
+            /* Authmode threshold resets to WPA2 as default if password matches WPA2 standards (pasword len => 8).
+             * If you want to connect the device to deprecated WEP/WPA networks, Please set the threshold value
+             * to WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK and set the password with length and format matching to
+             * WIFI_AUTH_WEP/WIFI_AUTH_WPA_PSK standards.
+             */
+            .threshold.authmode = ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD,
+            .sae_pwe_h2e = ESP_WIFI_SAE_MODE,
+            .sae_h2e_identifier = EXAMPLE_H2E_IDENTIFIER,
+        },
+    };
+
+    strncpy((char *)wifi_config.sta.ssid, name, sizeof(wifi_config.sta.ssid));
+    strncpy((char *)wifi_config.sta.password, password, sizeof(wifi_config.sta.password));
+
+    ESP_LOGI(TAG, "ssid: %s", wifi_config.sta.ssid);
+    ESP_LOGI(TAG, "password: %s", wifi_config.sta.password);
+
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+    ESP_ERROR_CHECK(esp_wifi_start());
+
+    ESP_LOGI(TAG, "wifi_init_sta finished.");
+
+    /* Waiting until either the connection is established (WIFI_CONNECTED_BIT) or connection failed for the maximum
+     * number of re-tries (WIFI_FAIL_BIT). The bits are set by event_handler() (see above) */
+    EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
+                                           WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
+                                           pdFALSE,
+                                           pdFALSE,
+                                           portMAX_DELAY);
+
+    /* xEventGroupWaitBits() returns the bits before the call returned, hence we can test which event actually
+     * happened. */
+    if (bits & WIFI_CONNECTED_BIT)
+    {
+        ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
+                  wifi_config.sta.ssid, wifi_config.sta.password);
+
+        lv_led_on(ui_wifiled);
+    }
+    else if (bits & WIFI_FAIL_BIT)
+    {
+        ESP_LOGI(TAG, "Failed to connect to SSID:%s, password:%s",
+                 wifi_config.sta.ssid, wifi_config.sta.password);
+        lv_led_off(ui_wifiled);
+    }
+    else
+    {
+        ESP_LOGE(TAG, "UNEXPECTED EVENT");
+    }
+}
+
+static void wifi_linkbtn(lv_event_t *e)
+{
+    
+    char wifiname[32];
+    lv_dropdown_get_selected_str(ui_wifiDropdown, wifiname, sizeof(wifiname));
+    ESP_LOGI(TAG, "Wifi SSID is %s\n", wifiname);
+    const char *pwd = lv_textarea_get_text(ui_passwordTextArea);
+    ESP_LOGI(TAG, "Wifi password is %s \n", pwd);
+
+    // ESP_ERROR_CHECK(esp_wifi_scan_stop());
+    // ESP_LOGI(TAG,"Wifi stop scaned");
+    nvs_init();
+    wifi_init_sta(wifiname,pwd);
+    // wifi_connect_sta(wifiname, pwd);
 }
 
 void ui_wifipage_screen_init(void)
 {
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-    sta_netif = esp_netif_create_default_wifi_sta();
-    assert(sta_netif);
+    esp_netif_create_default_wifi_sta();
 
     ui_wifipage = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_wifipage, LV_OBJ_FLAG_SCROLLABLE); /// Flags
@@ -95,7 +329,7 @@ void ui_wifipage_screen_init(void)
     lv_obj_set_x(ui_wifititle, -115);
     lv_obj_set_y(ui_wifititle, 7);
     lv_obj_set_align(ui_wifititle, LV_ALIGN_TOP_MID);
-    lv_label_set_text(ui_wifititle, "WiFi连接");
+    lv_label_set_text(ui_wifititle, "WiFi扫描");
     lv_obj_set_style_text_color(ui_wifititle, lv_color_hex(0x353232), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_wifititle, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_wifititle, &ui_font_Terminal22, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -111,6 +345,7 @@ void ui_wifipage_screen_init(void)
     {
         lv_dropdown_clear_options(ui_wifiDropdown);
     }
+    // lv_dropdown_add_option(ui_wifiDropdown, "jialongfei", 0);
 
     // wifi开关
     ui_wifiswitch = lv_switch_create(ui_wifipage);
@@ -120,6 +355,14 @@ void ui_wifipage_screen_init(void)
     lv_obj_set_y(ui_wifiswitch, -102);
     lv_obj_set_align(ui_wifiswitch, LV_ALIGN_CENTER);
     lv_obj_add_event_cb(ui_wifiswitch, switch_cb, LV_EVENT_CLICKED, NULL);
+
+    ui_wifiled = lv_led_create(ui_wifipage);
+    lv_obj_set_width(ui_wifiled, 25);
+    lv_obj_set_height(ui_wifiled, 25);
+    lv_obj_set_x(ui_wifiled, 160);
+    lv_obj_set_y(ui_wifiled, 5);
+    lv_led_off(ui_wifiled);
+    lv_led_set_color(ui_wifiled, lv_palette_main(LV_PALETTE_GREEN));
 
     ui_usefulwifilabel = lv_label_create(ui_wifipage);
     lv_obj_set_width(ui_usefulwifilabel, LV_SIZE_CONTENT);  /// 1
@@ -149,7 +392,7 @@ void ui_wifipage_screen_init(void)
     lv_obj_set_x(ui_passwordTextArea, 29);
     lv_obj_set_y(ui_passwordTextArea, -22);
     lv_obj_set_align(ui_passwordTextArea, LV_ALIGN_CENTER);
-    lv_textarea_set_placeholder_text(ui_passwordTextArea, "Placeholder...");
+    lv_textarea_set_placeholder_text(ui_passwordTextArea, "input password in here");
 
     ui_linkbtn = lv_btn_create(ui_wifipage);
     lv_obj_set_width(ui_linkbtn, 84);
@@ -172,6 +415,8 @@ void ui_wifipage_screen_init(void)
     lv_obj_set_style_text_color(ui_linklabel, lv_color_hex(0x394952), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(ui_linklabel, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(ui_linklabel, &ui_font_Terminal, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(ui_linkbtn, wifi_linkbtn, LV_EVENT_CLICKED, NULL);
 
     ui_wifiKeyboard = lv_keyboard_create(ui_wifipage);
     lv_obj_set_width(ui_wifiKeyboard, 300);
