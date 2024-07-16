@@ -19,6 +19,8 @@ SET(SOURCES screens/ui_Startpage.c
     images/ui_img_499049799.c
     images/ui_img_1887403499.c
     fonts/ui_font_Terminal22.c
-    fonts/ui_font_Terminal.c)
+    fonts/ui_font_Terminal.c
+    fonts/font_myawesome.c)
 
 add_library(ui ${SOURCES})
+

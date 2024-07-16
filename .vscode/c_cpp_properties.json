@@ -4,7 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "E:/Software/Espressif/frameworks/esp-idf-v5.2.1/components/**"
+                "E:/Software/Espressif/frameworks/esp-idf-v5.2.1/components/**",
+                "E:/Software/Espressif/frameworks/esp-idf-v5.2.1/examples/common_components/protocol_examples_common/include/**"
             ],
             "defines": [
                 "_DEBUG",

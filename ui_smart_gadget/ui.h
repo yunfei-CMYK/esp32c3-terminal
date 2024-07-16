@@ -17,6 +17,7 @@ extern "C" {
 
 #include "../main/qmi8658c.h"
 #include "../main/qmc5883l.h"
+#include "../main/gxhtc3.h"
 
 #include "esp_system.h"
 #include "esp_wifi.h"
@@ -29,6 +30,8 @@ extern "C" {
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
+
+#include "driver/uart.h"
 
 #include "nvs_flash.h"
 
@@ -80,6 +83,14 @@ void ui_weatherpage_screen_init(void);
 void ui_event_weatherpage(lv_event_t * e);
 extern lv_obj_t * ui_weatherpage;
 extern lv_obj_t * ui_Label12;
+
+extern int temp_value;
+extern int humi_value;
+
+extern float temp,humi;
+
+extern void get_th_task(void *args);
+
 // SCREEN: ui_gamepage
 void ui_gamepage_screen_init(void);
 void ui_event_gamepage(lv_event_t * e);
@@ -90,6 +101,14 @@ void ui_portpage_screen_init(void);
 void ui_event_portpage(lv_event_t * e);
 extern lv_obj_t * ui_portpage;
 extern lv_obj_t * ui_Label14;
+extern lv_obj_t * ui_inputtext;
+extern lv_obj_t * ui_sendbtn;
+extern lv_obj_t * ui_sendlabel;
+extern lv_obj_t * ui_outputtext;
+extern lv_obj_t * ui_baudrateDropdown;
+extern lv_obj_t * ui_clearbtn;
+extern lv_obj_t * ui_clearlabel;
+extern lv_obj_t * ui_inputkeyboard;
 // SCREEN: ui_mpupage
 void ui_mpupage_screen_init(void);
 void ui_event_mpupage(lv_event_t * e);
@@ -142,6 +161,7 @@ LV_IMG_DECLARE(ui_img_1887403499);    // assets/设置.png
 
 LV_FONT_DECLARE(ui_font_Terminal22);
 LV_FONT_DECLARE(ui_font_Terminal);
+LV_FONT_DECLARE(font_myawesome);
 
 
 

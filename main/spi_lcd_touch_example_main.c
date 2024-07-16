@@ -19,6 +19,7 @@
 #include "myi2c.h"
 #include "lv_demos.h"
 
+
 #include "driver/ledc.h"
 
 #include <time.h>
@@ -143,6 +144,51 @@ static void example_increase_lvgl_tick(void *arg)
     /* Tell LVGL how many milliseconds has elapsed */
     lv_tick_inc(EXAMPLE_LVGL_TICK_PERIOD_MS);
 }
+
+// 获取温湿度的任务函数
+void get_th_task(void *args)
+{
+    esp_err_t ret;
+    int time_cnt = 0, date_cnt = 0;
+    float temp_sum = 0.0, humi_sum = 0.0;
+
+    while (1)
+    {
+        ret = gxhtc3_get_tah(); // 获取一次温湿度
+        if (ret != ESP_OK)
+        {
+            ESP_LOGE(TAG, "GXHTC3 READ TAH ERROR.");
+        }
+        else
+        {                               // 如果成功获取数据
+            temp_sum = temp_sum + temp; // 温度累计和
+            humi_sum = humi_sum + humi; // 湿度累计和
+            date_cnt++;                 // 记录累计次数
+        }
+        vTaskDelay(100 / portTICK_PERIOD_MS); // 延时100毫秒
+        time_cnt++;                           // 每100毫秒+1
+        if (time_cnt > 10)                    // 1秒钟到
+        {
+            // 取平均数 且把结果四舍五入为整数
+            temp_value = round(temp_sum / date_cnt);
+            humi_value = round(humi_sum / date_cnt);
+            // 各标志位清零
+            time_cnt = 0;
+            date_cnt = 0;
+            temp_sum = 0;
+            humi_sum = 0;
+            // 标记温湿度有新数值
+            // th_update_flag = 1;
+            // ESP_LOGI(TAG, "TEMP:%d HUMI:%d", temp_value, humi_value);
+        }
+        // if (icon_flag == 0)
+        // {
+        //     break;
+        // }
+    }
+    vTaskDelete(NULL);
+}
+
 
 static void main_page_task(void *pvParameters)
 {

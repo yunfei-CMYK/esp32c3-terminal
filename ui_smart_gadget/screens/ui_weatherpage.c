@@ -5,20 +5,147 @@
 
 #include "../ui.h"
 
+
+lv_obj_t * temp_meter;
+lv_obj_t * humi_meter;
+lv_obj_t * temp_label;
+lv_obj_t * humi_label;
+lv_meter_indicator_t * temp_indic;
+lv_meter_indicator_t * humi_indic;
+int temp_value, humi_value; // 室内实时温湿度值
+
+// 定时更新温湿度值
+void thv_update_cb(lv_timer_t * timer)
+{
+    lv_meter_set_indicator_end_value(temp_meter, temp_indic, temp_value);
+    lv_meter_set_indicator_end_value(humi_meter, humi_indic, humi_value);
+    lv_label_set_text_fmt(temp_label, "%d℃", temp_value);
+    lv_label_set_text_fmt(humi_label, "%d%%", humi_value);
+}
+
 void ui_weatherpage_screen_init(void)
 {
+
+    gxhtc3_get_tah(); // 获取一次温湿度
+    temp_value = round(temp);
+    humi_value = round(humi);
+
     ui_weatherpage = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_weatherpage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_weatherpage, lv_color_hex(0x5295B4), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_weatherpage, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_Label12 = lv_label_create(ui_weatherpage);
-    lv_obj_set_width(ui_Label12, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_Label12, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_Label12, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_Label12, "天气");
-    lv_obj_set_style_text_font(ui_Label12, &ui_font_Terminal, LV_PART_MAIN | LV_STATE_DEFAULT);
+// 显示温度表
+    temp_meter = lv_meter_create(ui_weatherpage);
+    lv_obj_center(temp_meter);
+    lv_obj_set_size(temp_meter, 220, 220);
+    lv_obj_remove_style(temp_meter, NULL, LV_PART_INDICATOR);
 
+    lv_meter_scale_t * scale = lv_meter_add_scale(temp_meter);
+    lv_meter_set_scale_ticks(temp_meter, scale, 9, 2, 10, lv_palette_main(LV_PALETTE_GREY)); 
+    lv_meter_set_scale_major_ticks(temp_meter, scale, 1, 2, 12, lv_palette_main(LV_PALETTE_GREY), 12);
+    lv_meter_set_scale_range(temp_meter, scale, -30, 50, 160, 190); 
+
+    lv_meter_indicator_t * indic;
+
+    indic = lv_meter_add_arc(temp_meter, scale, 3, lv_palette_main(LV_PALETTE_BLUE), 0); 
+    lv_meter_set_indicator_start_value(temp_meter, indic, -30);
+    lv_meter_set_indicator_end_value(temp_meter, indic, 18);
+    indic = lv_meter_add_scale_lines(temp_meter, scale, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_BLUE), false, 0);
+    lv_meter_set_indicator_start_value(temp_meter, indic, -30);
+    lv_meter_set_indicator_end_value(temp_meter, indic, 18);
+
+    indic = lv_meter_add_arc(temp_meter, scale, 3, lv_palette_main(LV_PALETTE_GREEN), 0);
+    lv_meter_set_indicator_start_value(temp_meter, indic, 18);
+    lv_meter_set_indicator_end_value(temp_meter, indic, 25);
+    indic = lv_meter_add_scale_lines(temp_meter, scale, lv_palette_main(LV_PALETTE_GREEN), lv_palette_main(LV_PALETTE_GREEN), false, 0);
+    lv_meter_set_indicator_start_value(temp_meter, indic, 18);
+    lv_meter_set_indicator_end_value(temp_meter, indic, 25);
+
+    indic = lv_meter_add_arc(temp_meter, scale, 3, lv_palette_main(LV_PALETTE_RED), 0);
+    lv_meter_set_indicator_start_value(temp_meter, indic, 25);
+    lv_meter_set_indicator_end_value(temp_meter, indic, 50);
+    indic = lv_meter_add_scale_lines(temp_meter, scale, lv_palette_main(LV_PALETTE_RED), lv_palette_main(LV_PALETTE_RED), false, 0);
+    lv_meter_set_indicator_start_value(temp_meter, indic, 25);
+    lv_meter_set_indicator_end_value(temp_meter, indic, 50);
+
+    temp_indic = lv_meter_add_arc(temp_meter, scale, 10, lv_palette_main(LV_PALETTE_ORANGE), 13);
+    lv_meter_set_indicator_start_value(temp_meter, temp_indic, -30);
+    lv_meter_set_indicator_end_value(temp_meter, temp_indic, temp_value); 
+
+    lv_obj_t *temp_symbol_label = lv_label_create(temp_meter);
+    lv_obj_set_style_text_font(temp_symbol_label, &font_myawesome, 0);
+    lv_label_set_text(temp_symbol_label, "\xEF\x8B\x88");  // 温度图标
+    lv_obj_align(temp_symbol_label, LV_ALIGN_CENTER, -28, -30);
+
+    temp_label = lv_label_create(temp_meter);
+    lv_obj_set_style_text_font(temp_label, &ui_font_Terminal, 0);
+    lv_label_set_text_fmt(temp_label, "%d℃", temp_value);
+    lv_obj_align_to(temp_label, temp_symbol_label, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+
+    // 显示湿度表
+    humi_meter = lv_meter_create(ui_weatherpage);
+    lv_obj_center(humi_meter);
+    lv_obj_align(humi_meter, LV_ALIGN_CENTER, 0, 0);
+    lv_obj_set_size(humi_meter, 220, 220);
+    lv_obj_set_style_opa(humi_meter, LV_OPA_50, 0);
+    lv_obj_remove_style(humi_meter, NULL, LV_PART_INDICATOR);
+
+    lv_meter_scale_t * humi_scale = lv_meter_add_scale(humi_meter);
+    lv_meter_set_scale_ticks(humi_meter, humi_scale, 11, 2, 10, lv_palette_main(LV_PALETTE_GREY)); 
+    lv_meter_set_scale_major_ticks(humi_meter, humi_scale, 1, 2, 12, lv_palette_main(LV_PALETTE_GREY), 10); 
+    lv_meter_set_scale_range(humi_meter, humi_scale, 0, 100, 160, 10);
+
+    lv_meter_indicator_t * indic2;
+
+    indic2 = lv_meter_add_arc(humi_meter, humi_scale, 3, lv_palette_main(LV_PALETTE_BLUE), 0); 
+    lv_meter_set_indicator_start_value(humi_meter, indic2, 0);
+    lv_meter_set_indicator_end_value(humi_meter, indic2, 40);
+    indic2 = lv_meter_add_scale_lines(humi_meter, humi_scale, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_BLUE), false, 0);
+    lv_meter_set_indicator_start_value(humi_meter, indic2, 0);
+    lv_meter_set_indicator_end_value(humi_meter, indic2, 40);
+
+    indic2 = lv_meter_add_arc(humi_meter, humi_scale, 3, lv_palette_main(LV_PALETTE_GREEN), 0); 
+    lv_meter_set_indicator_start_value(humi_meter, indic2, 40);
+    lv_meter_set_indicator_end_value(humi_meter, indic2, 70);
+    indic2 = lv_meter_add_scale_lines(humi_meter, humi_scale, lv_palette_main(LV_PALETTE_GREEN), lv_palette_main(LV_PALETTE_GREEN), false, 0);
+    lv_meter_set_indicator_start_value(humi_meter, indic2, 40);
+    lv_meter_set_indicator_end_value(humi_meter, indic2, 70);
+
+    indic2 = lv_meter_add_arc(humi_meter, humi_scale, 3, lv_palette_main(LV_PALETTE_RED), 0); 
+    lv_meter_set_indicator_start_value(humi_meter, indic2, 70);
+    lv_meter_set_indicator_end_value(humi_meter, indic2, 100);
+    indic2 = lv_meter_add_scale_lines(humi_meter, humi_scale, lv_palette_main(LV_PALETTE_RED), lv_palette_main(LV_PALETTE_RED), false, 0);
+    lv_meter_set_indicator_start_value(humi_meter, indic2, 70);
+    lv_meter_set_indicator_end_value(humi_meter, indic2, 100);
+
+    humi_indic = lv_meter_add_arc(humi_meter, humi_scale, 10, lv_palette_main(LV_PALETTE_ORANGE), 13);
+    lv_meter_set_indicator_start_value(humi_meter, humi_indic, 0);
+    lv_meter_set_indicator_end_value(humi_meter, humi_indic, humi_value); 
+
+    lv_obj_t *humi_symbol_label = lv_label_create(temp_meter);
+    lv_obj_set_style_text_font(humi_symbol_label, &font_myawesome, 0);
+    lv_label_set_text(humi_symbol_label, "\xEF\x81\x83");  // 湿度图标
+    lv_obj_align(humi_symbol_label, LV_ALIGN_CENTER, -28, 30);
+
+    humi_label = lv_label_create(temp_meter);
+    lv_obj_set_style_text_font(humi_label, &ui_font_Terminal, 0);
+    lv_label_set_text_fmt(humi_label, "%d%%", humi_value);
+    lv_obj_align_to(humi_label, humi_symbol_label, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
+
+    // 创建一个获取温湿度的任务
+    xTaskCreate(get_th_task, "get_th_task", 4096, NULL, 5, NULL);
+    // 创建一个lv_timer 定时更新数据
+    my_lv_timer = lv_timer_create(thv_update_cb, 50, NULL);  
+
+    // ui_Label12 = lv_label_create(ui_weatherpage);
+    // lv_obj_set_width(ui_Label12, LV_SIZE_CONTENT);   /// 1
+    // lv_obj_set_height(ui_Label12, LV_SIZE_CONTENT);    /// 1
+    // lv_obj_set_align(ui_Label12, LV_ALIGN_TOP_MID);
+    // lv_label_set_text(ui_Label12, "天气");
+    // lv_obj_set_style_text_font(ui_Label12, &ui_font_Terminal, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    
     lv_obj_add_event_cb(ui_weatherpage, ui_event_weatherpage, LV_EVENT_ALL, NULL);
 
 }

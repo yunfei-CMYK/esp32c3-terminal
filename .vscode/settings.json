@@ -5,7 +5,10 @@
     "files.associations": {
         "main.h": "c",
         "ui.h": "c",
-        "esp_system.h": "c"
+        "esp_system.h": "c",
+        "ip_addr.h": "c",
+        "protocol_examples_common.h": "c",
+        "uart.h": "c"
     },
     "idf.openOcdConfigs": [
         "board/esp32c3-bridge.cfg"

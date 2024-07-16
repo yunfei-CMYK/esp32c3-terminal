@@ -2,5 +2,5 @@ file(GLOB_RECURSE SRC_SOURCES ../ui_smart_gadget/components/*.c ../ui_smart_gadg
 
 idf_component_register(SRCS "myi2c.c" "spi_lcd_touch_example_main.c" "lvgl_demo_ui.c"
                        SRCS "../ui_smart_gadget/ui.c" "../ui_smart_gadget/ui_helpers.c" ${SRC_SOURCES}
-                       SRCS "qmc5883l.c" "qmi8658c.c"
+                       SRCS "qmc5883l.c" "qmi8658c.c" "gxhtc3.c"
                        INCLUDE_DIRS "." "../ui_smart_gadget" )

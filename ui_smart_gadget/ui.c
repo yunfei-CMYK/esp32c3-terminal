@@ -72,6 +72,14 @@ void ui_portpage_screen_init(void);
 void ui_event_portpage(lv_event_t * e);
 lv_obj_t * ui_portpage;
 lv_obj_t * ui_Label14;
+lv_obj_t * ui_inputtext;
+lv_obj_t * ui_sendbtn;
+lv_obj_t * ui_sendlabel;
+lv_obj_t * ui_outputtext;
+lv_obj_t * ui_baudrateDropdown;
+lv_obj_t * ui_clearbtn;
+lv_obj_t * ui_clearlabel;
+lv_obj_t * ui_inputkeyboard;
 
 
 // SCREEN: ui_mpupage
