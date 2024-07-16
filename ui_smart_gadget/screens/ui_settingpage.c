@@ -6,6 +6,8 @@
 #include "../ui.h"
 #include "driver/ledc.h"
 
+static const char *TAG = "Setting";
+
 static void slider_event_cb(lv_event_t * e)
 {
     int x;
@@ -23,6 +25,7 @@ static void slider_event_cb(lv_event_t * e)
 
 void ui_settingpage_screen_init(void)
 {
+    ESP_LOGI(TAG,"设置界面初始化");
     ui_settingpage = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_settingpage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_settingpage, lv_color_hex(0x5295B4), LV_PART_MAIN | LV_STATE_DEFAULT);

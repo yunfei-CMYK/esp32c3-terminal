@@ -125,7 +125,6 @@ static void event_handler(void *arg, esp_event_base_t event_base, int32_t event_
     }
 }
 
-
 void wifi_init_sta(const char *name, const char *password)
 {
     s_wifi_event_group = xEventGroupCreate();
@@ -193,7 +192,7 @@ void wifi_init_sta(const char *name, const char *password)
     if (bits & WIFI_CONNECTED_BIT)
     {
         ESP_LOGI(TAG, "connected to ap SSID:%s password:%s",
-                  wifi_config.sta.ssid, wifi_config.sta.password);
+                 wifi_config.sta.ssid, wifi_config.sta.password);
 
         lv_led_on(ui_wifiled);
     }
@@ -211,7 +210,7 @@ void wifi_init_sta(const char *name, const char *password)
 
 static void wifi_linkbtn(lv_event_t *e)
 {
-    
+
     char wifiname[32];
     lv_dropdown_get_selected_str(ui_wifiDropdown, wifiname, sizeof(wifiname));
     ESP_LOGI(TAG, "Wifi SSID is %s\n", wifiname);
@@ -221,12 +220,41 @@ static void wifi_linkbtn(lv_event_t *e)
     // ESP_ERROR_CHECK(esp_wifi_scan_stop());
     // ESP_LOGI(TAG,"Wifi stop scaned");
     nvs_init();
-    wifi_init_sta(wifiname,pwd);
+    wifi_init_sta(wifiname, pwd);
     // wifi_connect_sta(wifiname, pwd);
+}
+
+static void passwordtextarea_event_cb(lv_event_t *e)
+{
+    lv_event_code_t eventcode = lv_event_get_code(e);
+    lv_obj_t *ta = lv_event_get_target(e);
+
+    lv_obj_t *kb = ui_wifiKeyboard;
+    switch (eventcode)
+    {
+    case LV_EVENT_FOCUSED:
+        if (kb && ta)
+        {
+            lv_keyboard_set_textarea(kb, ta);
+            lv_obj_clear_flag(kb, LV_OBJ_FLAG_HIDDEN);
+        }
+        break;
+    case LV_EVENT_DEFOCUSED:
+        if (kb)
+        {
+            lv_keyboard_set_textarea(kb, NULL);
+            lv_obj_add_flag(kb, LV_OBJ_FLAG_HIDDEN);
+        }
+        break;
+
+    default:
+        break;
+    }
 }
 
 void ui_wifipage_screen_init(void)
 {
+    ESP_LOGI(TAG,"WIFI配置界面初始化");
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     esp_netif_create_default_wifi_sta();
@@ -306,6 +334,7 @@ void ui_wifipage_screen_init(void)
     lv_obj_set_y(ui_passwordTextArea, -22);
     lv_obj_set_align(ui_passwordTextArea, LV_ALIGN_CENTER);
     lv_textarea_set_placeholder_text(ui_passwordTextArea, "input password in here");
+    lv_obj_add_event_cb(ui_passwordTextArea, passwordtextarea_event_cb, LV_EVENT_ALL, ui_wifiKeyboard);
 
     ui_linkbtn = lv_btn_create(ui_wifipage);
     lv_obj_set_width(ui_linkbtn, 84);
@@ -331,16 +360,19 @@ void ui_wifipage_screen_init(void)
 
     lv_obj_add_event_cb(ui_linkbtn, wifi_linkbtn, LV_EVENT_CLICKED, NULL);
 
-    ui_wifiKeyboard = lv_keyboard_create(ui_wifipage);
+    ui_wifiKeyboard = lv_keyboard_create(lv_layer_top());
     lv_obj_set_width(ui_wifiKeyboard, 300);
     lv_obj_set_height(ui_wifiKeyboard, 120);
     lv_obj_set_x(ui_wifiKeyboard, 1);
     lv_obj_set_y(ui_wifiKeyboard, 57);
     lv_obj_set_align(ui_wifiKeyboard, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_wifiKeyboard, LV_OBJ_FLAG_HIDDEN);
 
     lv_obj_set_style_bg_color(ui_wifiKeyboard, lv_color_hex(0xABD1E3), LV_PART_ITEMS | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_wifiKeyboard, 255, LV_PART_ITEMS | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_wifiKeyboard, ui_event_wifiKeyboard, LV_EVENT_ALL, NULL);
+
+
     lv_obj_add_event_cb(ui_wifipage, ui_event_wifipage, LV_EVENT_ALL, NULL);
 }

@@ -5,6 +5,8 @@
 
 #include "../ui.h"
 
+static const char *TAG = "Gamepage";
+
 lv_obj_t *mat;       // 创建一个弹力球的垫子
 lv_obj_t *ball;      // 创建一个弹力球
 int mat_flag;        // 弹力球标志位
@@ -66,6 +68,7 @@ void game_update_cb(lv_timer_t *timer)
 
 void ui_gamepage_screen_init(void)
 {
+    // ESP_LOGI(TAG, "游戏界面初始化");
     // 创建一个界面对象
     static lv_style_t style;
     lv_style_init(&style);

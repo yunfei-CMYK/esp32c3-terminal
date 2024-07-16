@@ -5,6 +5,7 @@
 
 #include "../ui.h"
 
+static const char *TAG = "Weather";
 
 lv_obj_t * temp_meter;
 lv_obj_t * humi_meter;
@@ -25,7 +26,7 @@ void thv_update_cb(lv_timer_t * timer)
 
 void ui_weatherpage_screen_init(void)
 {
-
+    // ESP_LOGI(TAG, "天气界面初始化");
     gxhtc3_get_tah(); // 获取一次温湿度
     temp_value = round(temp);
     humi_value = round(humi);
@@ -138,14 +139,6 @@ void ui_weatherpage_screen_init(void)
     // 创建一个lv_timer 定时更新数据
     my_lv_timer = lv_timer_create(thv_update_cb, 50, NULL);  
 
-    // ui_Label12 = lv_label_create(ui_weatherpage);
-    // lv_obj_set_width(ui_Label12, LV_SIZE_CONTENT);   /// 1
-    // lv_obj_set_height(ui_Label12, LV_SIZE_CONTENT);    /// 1
-    // lv_obj_set_align(ui_Label12, LV_ALIGN_TOP_MID);
-    // lv_label_set_text(ui_Label12, "天气");
-    // lv_obj_set_style_text_font(ui_Label12, &ui_font_Terminal, LV_PART_MAIN | LV_STATE_DEFAULT);
-
-    
     lv_obj_add_event_cb(ui_weatherpage, ui_event_weatherpage, LV_EVENT_ALL, NULL);
 
 }

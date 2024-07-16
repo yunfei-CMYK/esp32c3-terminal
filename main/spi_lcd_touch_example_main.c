@@ -181,7 +181,7 @@ void get_th_task(void *args)
             // th_update_flag = 1;
             // ESP_LOGI(TAG, "TEMP:%d HUMI:%d", temp_value, humi_value);
         }
-        // if (icon_flag == 0)
+        // if (page_flag == 0)
         // {
         //     break;
         // }

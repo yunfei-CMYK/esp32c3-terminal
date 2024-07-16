@@ -5,8 +5,11 @@
 
 #include "../ui.h"
 
+static const char *TAG = "StartPage";
+
 void ui_Startpage_screen_init(void)
-{
+{   
+    // ESP_LOGI(TAG, "开始界面初始化");
     ui_Startpage = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_Startpage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_Startpage, lv_color_hex(0x6D65A4), LV_PART_MAIN | LV_STATE_DEFAULT);

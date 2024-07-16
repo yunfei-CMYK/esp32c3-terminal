@@ -15,16 +15,18 @@ static const int RX_BUF_SIZE = 1024;
 #define TXD_PIN (GPIO_NUM_21)
 #define RXD_PIN (GPIO_NUM_20)
 
+static uart_config_t uart_config = {
+    .baud_rate = 115200,
+    .data_bits = UART_DATA_8_BITS,
+    .parity = UART_PARITY_DISABLE,
+    .stop_bits = UART_STOP_BITS_1,
+    .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+    .source_clk = UART_SCLK_DEFAULT,
+};
+
 void serialportconfig(void)
 {
-    const uart_config_t uart_config = {
-        .baud_rate = 115200,
-        .data_bits = UART_DATA_8_BITS,
-        .parity = UART_PARITY_DISABLE,
-        .stop_bits = UART_STOP_BITS_1,
-        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-        .source_clk = UART_SCLK_DEFAULT,
-    };
+
     uart_driver_install(UART_NUM_1, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
     uart_param_config(UART_NUM_1, &uart_config);
     uart_set_pin(UART_NUM_1, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
@@ -82,7 +84,7 @@ static void ui_event_inputtext(lv_event_t *e)
     }
 }
 
-static void task_receive_data(void *arg)
+void task_receive_data(void *arg)
 {
     static const char *RX_TASK_TAG = "RX_TASK";
     esp_log_level_set(RX_TASK_TAG, ESP_LOG_INFO);
@@ -121,8 +123,23 @@ static void ui_event_clearbtn(lv_event_t *e)
     lv_textarea_set_text(ui_outputtext, "");
 }
 
+static void ui_event_baudrate_dropdown(lv_event_t *e)
+{
+    lv_obj_t *dropdown = lv_event_get_target(e);
+    
+    char buf[16];
+    lv_dropdown_get_selected_str(dropdown, buf, sizeof(buf));
+    int baud_rate = atoi(buf);
+
+    uart_config.baud_rate = baud_rate;
+    ESP_LOGI(TAG, "Set baud rate: %d", uart_config.baud_rate);
+    
+    uart_param_config(UART_NUM_1, &uart_config);
+}
+
 void ui_portpage_screen_init(void)
 {
+    ESP_LOGI(TAG, "串口助手界面初始化");
     serialportconfig();
 
     ui_portpage = lv_obj_create(NULL);
@@ -179,14 +196,15 @@ void ui_portpage_screen_init(void)
     xTaskCreate(task_receive_data, "task_receive_data", 2048, NULL, 5, NULL);
 
     ui_baudrateDropdown = lv_dropdown_create(ui_portpage);
-    lv_dropdown_set_options(ui_baudrateDropdown, "4800\n9600\n14400\n19200\n38400\n56000\n57600\n115200");
+    lv_dropdown_set_options(ui_baudrateDropdown, "115200\n4800\n9600\n14400\n19200\n38400\n56000\n57600");
     lv_obj_set_width(ui_baudrateDropdown, 233);
     lv_obj_set_height(ui_baudrateDropdown, LV_SIZE_CONTENT); /// 1
     lv_obj_set_x(ui_baudrateDropdown, -37);
     lv_obj_set_y(ui_baudrateDropdown, 100);
     lv_obj_set_align(ui_baudrateDropdown, LV_ALIGN_CENTER);
     lv_obj_add_flag(ui_baudrateDropdown, LV_OBJ_FLAG_SCROLL_ON_FOCUS); /// Flags
-    // print current dropdown text
+    
+    lv_obj_add_event_cb(ui_baudrateDropdown, ui_event_baudrate_dropdown, LV_EVENT_VALUE_CHANGED, NULL);
 
     ui_clearbtn = lv_btn_create(ui_portpage);
     lv_obj_set_width(ui_clearbtn, 66);

@@ -201,6 +201,7 @@ void ui_event_wifibtn(lv_event_t * e)
         _ui_screen_change(&ui_wifipage, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_wifipage_screen_init);
     }
 }
+
 void ui_event_Mainpage(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
@@ -229,7 +230,7 @@ void ui_event_weather(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_weatherpage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_weatherpage_screen_init);
+        _ui_screen_change(&ui_weatherpage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0, &ui_weatherpage_screen_init);
     }
 }
 void ui_event_game(lv_event_t * e)
@@ -237,7 +238,7 @@ void ui_event_game(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_gamepage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_gamepage_screen_init);
+        _ui_screen_change(&ui_gamepage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0, &ui_gamepage_screen_init);
     }
 }
 void ui_event_port(lv_event_t * e)
@@ -245,7 +246,7 @@ void ui_event_port(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_portpage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_portpage_screen_init);
+        _ui_screen_change(&ui_portpage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0, &ui_portpage_screen_init);
     }
 }
 void ui_event_mpu(lv_event_t * e)
@@ -253,7 +254,7 @@ void ui_event_mpu(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_mpupage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_mpupage_screen_init);
+        _ui_screen_change(&ui_mpupage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0, &ui_mpupage_screen_init);
     }
 }
 void ui_event_campass(lv_event_t * e)
@@ -261,7 +262,7 @@ void ui_event_campass(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_campasspage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_campasspage_screen_init);
+        _ui_screen_change(&ui_campasspage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0, &ui_campasspage_screen_init);
     }
 }
 void ui_event_setting(lv_event_t * e)
@@ -269,7 +270,7 @@ void ui_event_setting(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_CLICKED) {
-        _ui_screen_change(&ui_settingpage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 500, 0, &ui_settingpage_screen_init);
+        _ui_screen_change(&ui_settingpage, LV_SCR_LOAD_ANIM_MOVE_LEFT, 200, 0, &ui_settingpage_screen_init);
     }
 }
 void ui_event_weatherpage(lv_event_t * e)
@@ -278,7 +279,7 @@ void ui_event_weatherpage(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_Mainpage_screen_init);
+        _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0, &ui_Mainpage_screen_init);
     }
 }
 void ui_event_gamepage(lv_event_t * e)
@@ -287,7 +288,7 @@ void ui_event_gamepage(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_Mainpage_screen_init);
+        _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0, &ui_Mainpage_screen_init);
     }
 }
 void ui_event_portpage(lv_event_t * e)
@@ -296,7 +297,7 @@ void ui_event_portpage(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_Mainpage_screen_init);
+        _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0, &ui_Mainpage_screen_init);
     }
 }
 void ui_event_mpupage(lv_event_t * e)
@@ -305,7 +306,7 @@ void ui_event_mpupage(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_Mainpage_screen_init);
+        _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0, &ui_Mainpage_screen_init);
     }
 }
 void ui_event_campasspage(lv_event_t * e)
@@ -313,7 +314,7 @@ void ui_event_campasspage(lv_event_t * e)
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_LONG_PRESSED){
-        _ui_screen_change(&ui_Mainpage,LV_SCR_LOAD_ANIM_NONE, 500,0,&ui_Mainpage_screen_init);
+        _ui_screen_change(&ui_Mainpage,LV_SCR_LOAD_ANIM_NONE, 200,0,&ui_Mainpage_screen_init);
     }
 }
 void ui_event_settingpage(lv_event_t * e)
@@ -322,7 +323,7 @@ void ui_event_settingpage(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_TOP) {
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_Mainpage_screen_init);
+        _ui_screen_change(&ui_Mainpage, LV_SCR_LOAD_ANIM_MOVE_TOP, 200, 0, &ui_Mainpage_screen_init);
     }
 }
 void ui_event_wifipage(lv_event_t * e)
@@ -331,7 +332,7 @@ void ui_event_wifipage(lv_event_t * e)
     lv_obj_t * target = lv_event_get_target(e);
     if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
         lv_indev_wait_release(lv_indev_get_act());
-        _ui_screen_change(&ui_Startpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 500, 0, &ui_Startpage_screen_init);
+        _ui_screen_change(&ui_Startpage, LV_SCR_LOAD_ANIM_MOVE_RIGHT, 200, 0, &ui_Startpage_screen_init);
     }
 }
 

@@ -9,6 +9,8 @@ lv_obj_t * comp_label;
 lv_obj_t * compass_meter;
 lv_meter_scale_t * compass_scale;
 
+static const char *TAG = "Campass";
+
 // 定时更新方位角的值
 void comp_update_cb(lv_timer_t * timer)
 {
@@ -25,22 +27,12 @@ void comp_update_cb(lv_timer_t * timer)
 
 void ui_campasspage_screen_init(void)
 {
-// 创建一个界面对象
-    static lv_style_t style;
-    lv_style_init(&style);
-    lv_style_set_radius(&style, 10); 
-    lv_style_set_bg_opa( &style, LV_OPA_COVER );
-    lv_style_set_bg_color(&style, lv_color_hex(0x00BFFF));
-    lv_style_set_bg_grad_color( &style, lv_color_hex(0x00BF00));
-    lv_style_set_bg_grad_dir( &style, LV_GRAD_DIR_VER );
-    lv_style_set_border_width(&style, 0);
-    lv_style_set_pad_all(&style, 0);
-    lv_style_set_width(&style, 320);  
-    lv_style_set_height(&style, 240); 
-
+    ESP_LOGI(TAG,"指南针界面初始化");
+    // 创建一个界面对象
     ui_campasspage = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_campasspage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
-    lv_obj_add_style(ui_campasspage, &style, 0);
+    lv_obj_set_style_bg_color(ui_campasspage, lv_color_hex(0x5295B4), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_campasspage, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // 绘制指南针仪表
     compass_meter = lv_meter_create(ui_campasspage);
@@ -70,13 +62,6 @@ void ui_campasspage_screen_init(void)
 
     // 创建一个lv_timer 用于更新方位角的值
     my_lv_timer = lv_timer_create(comp_update_cb, 100, NULL);  
-
-    // ui_Label16 = lv_label_create(ui_campasspage);
-    // lv_obj_set_width(ui_Label16, LV_SIZE_CONTENT);   /// 1
-    // lv_obj_set_height(ui_Label16, LV_SIZE_CONTENT);    /// 1
-    // lv_obj_set_align(ui_Label16, LV_ALIGN_CENTER);
-    // lv_label_set_text(ui_Label16, "指南针");
-    // lv_obj_set_style_text_font(ui_Label16, &ui_font_Terminal, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_campasspage, ui_event_campasspage, LV_EVENT_ALL, NULL);
 

@@ -10,7 +10,15 @@
         "protocol_examples_common.h": "c",
         "uart.h": "c"
     },
-    "idf.openOcdConfigs": [
+    "workbench.colorCustomizations": {
+        "tab.activeBackground": "#1a1a1b",
+        "activityBar.background": "#1a1a1b",
+        "sideBar.background": "#1a1a1b",
+        "tab.activeBorder": "#1a1a1b",
+        "editor.background": "#1b1a1a",
+        "terminal.background": "#1a1a1b"
+    },
+        "idf.openOcdConfigs": [
         "board/esp32c3-bridge.cfg"
     ]
 }
