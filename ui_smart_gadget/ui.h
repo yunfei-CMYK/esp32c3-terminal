@@ -32,6 +32,7 @@ extern "C" {
 #include "freertos/event_groups.h"
 
 #include "driver/uart.h"
+#include "driver/gpio.h"
 
 #include "nvs_flash.h"
 
