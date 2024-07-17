@@ -27,16 +27,16 @@ static uart_config_t uart_config = {
 void serialportconfig(void)
 {
 
-    uart_driver_install(UART_NUM_1, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
-    uart_param_config(UART_NUM_1, &uart_config);
-    uart_set_pin(UART_NUM_1, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    uart_driver_install(UART_NUM_0, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
+    uart_param_config(UART_NUM_0, &uart_config);
+    uart_set_pin(UART_NUM_0, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
 }
 
 int sendData(const char *data)
 {
     serialportconfig();
     const int len = strlen(data);
-    const int txBytes = uart_write_bytes(UART_NUM_1, data, len);
+    const int txBytes = uart_write_bytes(UART_NUM_0, data, len);
     // ESP_LOGI(TAG, "Wrote %d bytes", txBytes);
     return txBytes;
 }
@@ -82,7 +82,7 @@ void task_receive_data(void *arg)
 
     while (1)
     {
-        const int rxBytes = uart_read_bytes(UART_NUM_1, data, RX_BUF_SIZE, 1000 / portTICK_PERIOD_MS);
+        const int rxBytes = uart_read_bytes(UART_NUM_0, data, RX_BUF_SIZE, 1000 / portTICK_PERIOD_MS);
         if (rxBytes > 0)
         {
             data[rxBytes] = 0;
@@ -94,7 +94,7 @@ void task_receive_data(void *arg)
         }
         if(screen_state == function_page)
         {
-            uart_driver_delete(UART_NUM_1);
+            uart_driver_delete(UART_NUM_0);
             ESP_LOGI(TAG,"释放串口驱动资源");
             ESP_LOGI(TAG,"返回功能界面");
             break;
@@ -133,7 +133,7 @@ static void ui_event_baudrate_dropdown(lv_event_t *e)
     uart_config.baud_rate = baud_rate;
     ESP_LOGI(TAG, "Set baud rate: %d", uart_config.baud_rate);
     
-    uart_param_config(UART_NUM_1, &uart_config);
+    uart_param_config(UART_NUM_0, &uart_config);
 }
 
 void ui_portpage_screen_init(void)
