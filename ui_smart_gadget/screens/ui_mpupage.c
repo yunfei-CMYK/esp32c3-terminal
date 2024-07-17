@@ -5,16 +5,18 @@
 
 #include "../ui.h"
 
-
-static const char *TAG = "MPU";
+static char * TAG = "MPU";
 
 lv_obj_t * att_x_label;
 lv_obj_t * att_y_label;
 lv_obj_t * att_led;
 
+lv_timer_t *my_lv_timer;
+
 // 定时更新水平仪坐标值
 void att_update_cb(lv_timer_t * timer)
-{
+{   
+    ESP_LOGI(TAG,"姿态传感器参数更新函数");
     t_sQMI8658C QMI8658C;
     int att_led_x, att_led_y;
 
@@ -24,15 +26,16 @@ void att_update_cb(lv_timer_t * timer)
     lv_obj_align(att_led, LV_ALIGN_CENTER, -att_led_x, att_led_y);
     lv_label_set_text_fmt(att_x_label, "X=%d°", -att_led_x);
     lv_label_set_text_fmt(att_y_label, "Y=%d°", att_led_y);
+    ESP_LOGI(TAG,"att_led__x = %d,att_led_y = %d",att_led_x,att_led_y);
 }
 
 void ui_mpupage_screen_init(void)
 {
-    ESP_LOGI(TAG, "陀螺仪界面初始化");
-    // 创建一个界面对象
+    ESP_LOGI(TAG,"姿态传感器初始化");
+ 
 
     ui_mpupage = lv_obj_create(NULL);
-    lv_obj_clear_flag(ui_mpupage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_clear_flag(ui_mpupage, LV_OBJ_FLAG_SCROLLABLE);      // Flags
     lv_obj_set_style_bg_color(ui_mpupage, lv_color_hex(0x5295B4), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_mpupage, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -62,8 +65,6 @@ void ui_mpupage_screen_init(void)
     lv_obj_set_style_text_color(att_y_label, lv_color_hex(0xffffff), 0);
     lv_obj_align(att_y_label, LV_ALIGN_TOP_RIGHT, -20, 20);
 
-    // 创建一个lv_timer 用于更新圆的坐标 
-    my_lv_timer = lv_timer_create(att_update_cb, 100, NULL); 
 
     lv_obj_add_event_cb(ui_mpupage, ui_event_mpupage, LV_EVENT_ALL, NULL);
 

@@ -4,7 +4,6 @@
 // Project name: Terminal
 
 #include "../ui.h"
-#include "esp_system.h"
 
 #define DEFAULT_SCAN_LIST_SIZE 10
 

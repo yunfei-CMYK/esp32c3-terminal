@@ -4,12 +4,12 @@
 // Project name: Terminal
 
 #include "../ui.h"
-#include "driver/ledc.h"
 
 static const char *TAG = "Setting";
 
 static void slider_event_cb(lv_event_t * e)
 {
+    ESP_LOGI(TAG,"设置界面更新参数");
     int x;
 
     lv_obj_t * slider = lv_event_get_target(e);
@@ -20,6 +20,7 @@ static void slider_event_cb(lv_event_t * e)
     ledc_set_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0, 8191*(1-bg_duty)); 
     // 更新背光
     ledc_update_duty(LEDC_LOW_SPEED_MODE, LEDC_CHANNEL_0);
+    ESP_LOGI(TAG,"bg_duty = %f",bg_duty);
 }
 
 

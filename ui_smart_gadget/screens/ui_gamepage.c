@@ -5,7 +5,7 @@
 
 #include "../ui.h"
 
-static const char *TAG = "Gamepage";
+static const char *TAG = "Game";
 
 lv_obj_t *mat;       // 创建一个弹力球的垫子
 lv_obj_t *ball;      // 创建一个弹力球
@@ -15,10 +15,9 @@ int ball_dir = 0;    // 弹力球的方向
 int mat_height = 0;  // 垫子的高度
 int strength = 0;
 
-lv_timer_t *my_lv_timer;
-
 void game_update_cb(lv_timer_t *timer)
 {
+    ESP_LOGI(TAG, "游戏界面更新参数");
     if (strength != 0) // 发现有手指按下屏幕
     {
         if (strength < 31) // 限制手指按下时间最大为30
@@ -64,11 +63,12 @@ void game_update_cb(lv_timer_t *timer)
             }
         }
     }
+    ESP_LOGI(TAG, "mat_flag = %d,ball_dir = %d,mat_height = %d,strength = %d", mat_flag, ball_dir, mat_height, strength);
 }
 
 void ui_gamepage_screen_init(void)
 {
-    // ESP_LOGI(TAG, "游戏界面初始化");
+    ESP_LOGI(TAG, "游戏界面初始化");
     // 创建一个界面对象
     static lv_style_t style;
     lv_style_init(&style);
@@ -107,8 +107,6 @@ void ui_gamepage_screen_init(void)
     lv_led_set_color(ball, lv_palette_main(LV_PALETTE_DEEP_ORANGE));
     lv_obj_align_to(ball, mat, LV_ALIGN_OUT_TOP_MID, 0, 0);
 
-    // 创建一个lv_timer 用于更新圆球的坐标
-    my_lv_timer = lv_timer_create(game_update_cb, 50, NULL); //
 
     lv_obj_add_event_cb(ui_gamepage, ui_event_gamepage, LV_EVENT_ALL, NULL);
 }

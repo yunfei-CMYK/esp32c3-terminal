@@ -9,7 +9,7 @@ static const char *TAG = "Mainpage";
 
 void ui_Mainpage_screen_init(void)
 {   
-    // ESP_LOGI(TAG, "功能菜单界面初始化");
+    ESP_LOGI(TAG, "功能菜单界面初始化");
     ui_Mainpage = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_Mainpage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_Mainpage, lv_color_hex(0x5394B4), LV_PART_MAIN | LV_STATE_DEFAULT);

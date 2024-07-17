@@ -14,6 +14,7 @@ static const char *TAG = "Campass";
 // 定时更新方位角的值
 void comp_update_cb(lv_timer_t * timer)
 {
+    ESP_LOGI(TAG,"地磁传感器更新参数");
     t_sQMC5883L QMC5883L;
     int comp_angle;
 
@@ -22,7 +23,8 @@ void comp_update_cb(lv_timer_t * timer)
     comp_angle = (comp_angle + 120)%360;  // 校准角度 正北为0
     lv_label_set_text_fmt(comp_label, "%d°", comp_angle);
     comp_angle = 360 - (comp_angle+90)%360;  // 计算旋转角度
-    lv_meter_set_scale_range(compass_meter, compass_scale, 0, 360, 360, comp_angle); 
+    lv_meter_set_scale_range(compass_meter, compass_scale, 0, 360, 360, comp_angle);
+    ESP_LOGI(TAG,"comp_angle = %d °",comp_angle); 
 }
 
 void ui_campasspage_screen_init(void)
@@ -59,9 +61,7 @@ void ui_campasspage_screen_init(void)
     lv_obj_set_style_text_color(comp_label, lv_color_hex(0xffffff), 0);
     lv_obj_align(comp_label, LV_ALIGN_CENTER, 0, 0);
     lv_label_set_text(comp_label, "0");
-
-    // 创建一个lv_timer 用于更新方位角的值
-    my_lv_timer = lv_timer_create(comp_update_cb, 100, NULL);  
+  
 
     lv_obj_add_event_cb(ui_campasspage, ui_event_campasspage, LV_EVENT_ALL, NULL);
 

@@ -8,7 +8,9 @@
         "esp_system.h": "c",
         "ip_addr.h": "c",
         "protocol_examples_common.h": "c",
-        "uart.h": "c"
+        "uart.h": "c",
+        "time.h": "c",
+        "qmc5883l.h": "c"
     },
     "workbench.colorCustomizations": {
         "tab.activeBackground": "#1a1a1b",

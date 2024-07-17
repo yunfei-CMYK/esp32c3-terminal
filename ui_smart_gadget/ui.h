@@ -33,11 +33,27 @@ extern "C" {
 
 #include "driver/uart.h"
 #include "driver/gpio.h"
+#include "driver/ledc.h"
 
 #include "nvs_flash.h"
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
+
+typedef enum{
+    start_page,
+    function_page,
+    wifi_page,
+    tha_page,
+    game_page,
+    serialport_page,
+    mpu_page,
+    campass_page,
+    setting_page,
+}menustate;
+
+extern menustate screen_state;
+
 
 void showanim_Animation(lv_obj_t * TargetObject, int delay);
 // SCREEN: ui_Startpage
@@ -82,6 +98,7 @@ extern lv_obj_t * ui_functionmenutitle;
 // SCREEN: ui_weatherpage
 void ui_weatherpage_screen_init(void);
 void ui_event_weatherpage(lv_event_t * e);
+void thv_update_cb(lv_timer_t * timer);
 extern lv_obj_t * ui_weatherpage;
 extern lv_obj_t * ui_Label12;
 
@@ -89,17 +106,18 @@ extern int temp_value;
 extern int humi_value;
 
 extern float temp,humi;
-
-extern void get_th_task(void *args);
+void get_th_task(void *args);
 
 // SCREEN: ui_gamepage
 void ui_gamepage_screen_init(void);
 void ui_event_gamepage(lv_event_t * e);
+void game_update_cb(lv_timer_t *timer);
 extern lv_obj_t * ui_gamepage;
 extern lv_obj_t * ui_Label13;
 // SCREEN: ui_portpage
 void ui_portpage_screen_init(void);
 void ui_event_portpage(lv_event_t * e);
+void task_receive_data(void *arg);
 extern lv_obj_t * ui_portpage;
 extern lv_obj_t * ui_Label14;
 extern lv_obj_t * ui_inputtext;
@@ -113,11 +131,13 @@ extern lv_obj_t * ui_inputkeyboard;
 // SCREEN: ui_mpupage
 void ui_mpupage_screen_init(void);
 void ui_event_mpupage(lv_event_t * e);
+void att_update_cb(lv_timer_t * timer);
 extern lv_obj_t * ui_mpupage;
 extern lv_obj_t * ui_Label15;
 // SCREEN: ui_campasspage
 void ui_campasspage_screen_init(void);
 void ui_event_campasspage(lv_event_t * e);
+void comp_update_cb(lv_timer_t * timer);
 extern lv_obj_t * ui_campasspage;
 extern lv_obj_t * ui_Label16;
 // SCREEN: ui_settingpage
@@ -160,8 +180,8 @@ LV_IMG_DECLARE(ui_img_1887403499);    // assets/设置.png
 
 
 
-LV_FONT_DECLARE(ui_font_Terminal22);
 LV_FONT_DECLARE(ui_font_Terminal);
+LV_FONT_DECLARE(ui_font_Terminal22);
 LV_FONT_DECLARE(font_myawesome);
 
 

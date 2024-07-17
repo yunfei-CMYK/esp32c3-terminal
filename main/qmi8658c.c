@@ -30,14 +30,15 @@ void qmi8658c_init(void)
         qmi8658c_register_read(QMI8658C_WHO_AM_I, &id ,1);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
     }
-    ESP_LOGI(TAG, "QMI8658C OK!");
-
+    
     qmi8658c_register_write_byte(QMI8658C_RESET, 0xb0);  // 复位
     vTaskDelay(10 / portTICK_PERIOD_MS);
     qmi8658c_register_write_byte(QMI8658C_CTRL1, 0x40); // CTRL1 设置地址自动增加
     qmi8658c_register_write_byte(QMI8658C_CTRL7, 0x03); // CTRL7 允许加速度和陀螺仪
     qmi8658c_register_write_byte(QMI8658C_CTRL2, 0x95); // CTRL2 设置ACC 4g 250Hz
     qmi8658c_register_write_byte(QMI8658C_CTRL3, 0xd5); // CTRL3 设置GRY 512dps 250Hz 
+
+    ESP_LOGI(TAG, "QMI8658C OK!");
 }
 
 void qmi8658c_Read_AccAndGry(t_sQMI8658C *p)

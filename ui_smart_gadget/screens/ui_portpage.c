@@ -34,22 +34,11 @@ void serialportconfig(void)
 
 int sendData(const char *data)
 {
+    serialportconfig();
     const int len = strlen(data);
     const int txBytes = uart_write_bytes(UART_NUM_1, data, len);
-    ESP_LOGI(TAG, "Wrote %d bytes", txBytes);
+    // ESP_LOGI(TAG, "Wrote %d bytes", txBytes);
     return txBytes;
-}
-
-int receiveData(uint8_t *data, int length)
-{
-    const int rxBytes = uart_read_bytes(UART_NUM_1, data, length, 1000 / portTICK_PERIOD_MS);
-    if (rxBytes > 0)
-    {
-        data[rxBytes] = 0;
-        ESP_LOGI(TAG, "Read %d bytes: '%s'", rxBytes, data);
-        ESP_LOG_BUFFER_HEXDUMP(TAG, data, rxBytes, LV_LOG_LEVEL_INFO);
-    }
-    return rxBytes;
 }
 
 static void ui_event_inputtext(lv_event_t *e)
@@ -86,6 +75,7 @@ static void ui_event_inputtext(lv_event_t *e)
 
 void task_receive_data(void *arg)
 {
+    serialportconfig();
     static const char *RX_TASK_TAG = "RX_TASK";
     esp_log_level_set(RX_TASK_TAG, ESP_LOG_INFO);
     uint8_t *data = (uint8_t *)malloc(RX_BUF_SIZE + 1);
@@ -96,21 +86,30 @@ void task_receive_data(void *arg)
         if (rxBytes > 0)
         {
             data[rxBytes] = 0;
-            ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, data);
+            // ESP_LOGI(RX_TASK_TAG, "Read %d bytes: '%s'", rxBytes, data);
             ESP_LOG_BUFFER_HEXDUMP(RX_TASK_TAG, data, rxBytes, ESP_LOG_INFO);
 
             // 更新 LVGL 文本框控件
             lv_textarea_add_text(ui_outputtext, (const char *)data);
         }
+        if(screen_state == function_page)
+        {
+            uart_driver_delete(UART_NUM_1);
+            ESP_LOGI(TAG,"释放串口驱动资源");
+            ESP_LOGI(TAG,"返回功能界面");
+            break;
+        }
     }
     free(data);
+    vTaskDelete(NULL);
+    ESP_LOGI(TAG,"发送数据任务删除");
 }
 
 static void ui_event_sendbtn(lv_event_t *e)
 {
     const char *input_text = lv_textarea_get_text(ui_inputtext);
 
-    ESP_LOGI(TAG, "Send data: %s", input_text);
+    // ESP_LOGI(TAG, "Send data: %s", input_text);
 
     sendData(input_text);
 
@@ -140,7 +139,6 @@ static void ui_event_baudrate_dropdown(lv_event_t *e)
 void ui_portpage_screen_init(void)
 {
     ESP_LOGI(TAG, "串口助手界面初始化");
-    serialportconfig();
 
     ui_portpage = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_portpage, LV_OBJ_FLAG_SCROLLABLE); /// Flags
@@ -193,7 +191,6 @@ void ui_portpage_screen_init(void)
     lv_obj_set_y(ui_outputtext, 16);
     lv_obj_set_align(ui_outputtext, LV_ALIGN_CENTER);
     lv_textarea_set_placeholder_text(ui_outputtext, "receive data...");
-    xTaskCreate(task_receive_data, "task_receive_data", 2048, NULL, 5, NULL);
 
     ui_baudrateDropdown = lv_dropdown_create(ui_portpage);
     lv_dropdown_set_options(ui_baudrateDropdown, "115200\n4800\n9600\n14400\n19200\n38400\n56000\n57600");

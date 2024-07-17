@@ -20,8 +20,6 @@
 #include "lv_demos.h"
 
 
-#include "driver/ledc.h"
-
 #include <time.h>
 #include <sys/time.h>
 
@@ -29,7 +27,6 @@
 
 #include "esp_lcd_touch_ft5x06.h"
 
-#include "esp_wifi.h"
 
 
 static const char *TAG = "Terminal";
@@ -143,50 +140,6 @@ static void example_increase_lvgl_tick(void *arg)
 {
     /* Tell LVGL how many milliseconds has elapsed */
     lv_tick_inc(EXAMPLE_LVGL_TICK_PERIOD_MS);
-}
-
-// 获取温湿度的任务函数
-void get_th_task(void *args)
-{
-    esp_err_t ret;
-    int time_cnt = 0, date_cnt = 0;
-    float temp_sum = 0.0, humi_sum = 0.0;
-
-    while (1)
-    {
-        ret = gxhtc3_get_tah(); // 获取一次温湿度
-        if (ret != ESP_OK)
-        {
-            ESP_LOGE(TAG, "GXHTC3 READ TAH ERROR.");
-        }
-        else
-        {                               // 如果成功获取数据
-            temp_sum = temp_sum + temp; // 温度累计和
-            humi_sum = humi_sum + humi; // 湿度累计和
-            date_cnt++;                 // 记录累计次数
-        }
-        vTaskDelay(100 / portTICK_PERIOD_MS); // 延时100毫秒
-        time_cnt++;                           // 每100毫秒+1
-        if (time_cnt > 10)                    // 1秒钟到
-        {
-            // 取平均数 且把结果四舍五入为整数
-            temp_value = round(temp_sum / date_cnt);
-            humi_value = round(humi_sum / date_cnt);
-            // 各标志位清零
-            time_cnt = 0;
-            date_cnt = 0;
-            temp_sum = 0;
-            humi_sum = 0;
-            // 标记温湿度有新数值
-            // th_update_flag = 1;
-            // ESP_LOGI(TAG, "TEMP:%d HUMI:%d", temp_value, humi_value);
-        }
-        // if (page_flag == 0)
-        // {
-        //     break;
-        // }
-    }
-    vTaskDelete(NULL);
 }
 
 
@@ -328,7 +281,7 @@ void app_main(void)
 
     qmi8658c_init();  // 姿态传感器初始化
     qmc5883l_init();  // 方位角传感器初始化
-    ESP_LOGI(TAG, "[APP] Free memory: %lu bytes", (unsigned long)esp_get_free_heap_size());
+    // ESP_LOGI(TAG, "[APP] Free memory: %lu bytes", (unsigned long)esp_get_free_heap_size());
 
     lcd_brightness_init();
     bg_duty = 0.5;
@@ -341,7 +294,7 @@ void app_main(void)
     while (1)
     {
         // raise the task priority of LVGL and/or reduce the handler period can improve the performance
-        vTaskDelay(pdMS_TO_TICKS(10));
+        // vTaskDelay(pdMS_TO_TICKS(10));
         // The task running lv_timer_handler should have lower priority than that running `lv_tick_inc`
         lv_timer_handler();
     }
