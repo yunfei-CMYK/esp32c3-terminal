@@ -10,6 +10,9 @@ This example demonstrates how to use LVGL on ESP32-C3.
 
 ## Software
 
+- esp-idf-v5.2.1
+- lvgl-8.3.0
+
 在官方掌机例程的基础上，修改部分功能：
   1. 取消了回声应用
   2. 修改了页面显示框架
