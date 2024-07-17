@@ -50,10 +50,16 @@ typedef enum{
     mpu_page,
     campass_page,
     setting_page,
+    netapp_page,
 }menustate;
 
 extern menustate screen_state;
 
+
+extern int strength;
+extern float bg_duty;
+extern lv_timer_t *my_lv_timer;
+extern bool wifiswitch_flag;
 
 void showanim_Animation(lv_obj_t * TargetObject, int delay);
 // SCREEN: ui_Startpage
@@ -104,7 +110,6 @@ extern lv_obj_t * ui_Label12;
 
 extern int temp_value;
 extern int humi_value;
-
 extern float temp,humi;
 void get_th_task(void *args);
 
@@ -162,13 +167,13 @@ extern lv_obj_t * ui_linkbtn;
 extern lv_obj_t * ui_linklabel;
 void ui_event_wifiKeyboard(lv_event_t * e);
 extern lv_obj_t * ui_wifiKeyboard;
+// SCREEN: ui_netapp
+void ui_netapp_screen_init(void);
+void ui_event_netapp(lv_event_t * e);
+extern lv_obj_t * ui_netapp;
+extern lv_obj_t * ui_netapptitle;
 extern lv_obj_t * ui____initial_actions0;
 
-
-extern int strength;
-extern float bg_duty;
-extern lv_timer_t *my_lv_timer;
-extern bool wifiswitch_flag;
 
 LV_IMG_DECLARE(ui_img_wifi_png);    // assets/Wifi.png
 LV_IMG_DECLARE(ui_img_944254084);    // assets/天气.png
@@ -183,7 +188,6 @@ LV_IMG_DECLARE(ui_img_1887403499);    // assets/设置.png
 LV_FONT_DECLARE(ui_font_Terminal);
 LV_FONT_DECLARE(ui_font_Terminal22);
 LV_FONT_DECLARE(font_myawesome);
-
 
 
 void ui_init(void);

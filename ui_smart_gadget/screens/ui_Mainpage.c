@@ -8,7 +8,7 @@
 static const char *TAG = "Mainpage";
 
 void ui_Mainpage_screen_init(void)
-{   
+{
     ESP_LOGI(TAG, "功能菜单界面初始化");
     ui_Mainpage = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_Mainpage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags

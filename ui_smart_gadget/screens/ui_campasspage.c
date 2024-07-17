@@ -30,7 +30,7 @@ void comp_update_cb(lv_timer_t * timer)
 void ui_campasspage_screen_init(void)
 {
     ESP_LOGI(TAG,"指南针界面初始化");
-    // 创建一个界面对象
+
     ui_campasspage = lv_obj_create(NULL);
     lv_obj_clear_flag(ui_campasspage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_campasspage, lv_color_hex(0x5295B4), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -61,9 +61,13 @@ void ui_campasspage_screen_init(void)
     lv_obj_set_style_text_color(comp_label, lv_color_hex(0xffffff), 0);
     lv_obj_align(comp_label, LV_ALIGN_CENTER, 0, 0);
     lv_label_set_text(comp_label, "0");
-  
+    // ui_Label16 = lv_label_create(ui_campasspage);
+    // lv_obj_set_width(ui_Label16, LV_SIZE_CONTENT);   /// 1
+    // lv_obj_set_height(ui_Label16, LV_SIZE_CONTENT);    /// 1
+    // lv_obj_set_align(ui_Label16, LV_ALIGN_CENTER);
+    // lv_label_set_text(ui_Label16, "指南针");
+    // lv_obj_set_style_text_font(ui_Label16, &ui_font_Terminal, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_campasspage, ui_event_campasspage, LV_EVENT_ALL, NULL);
-
 
 }

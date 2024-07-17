@@ -7,6 +7,7 @@ screens/ui_mpupage.c
 screens/ui_campasspage.c
 screens/ui_settingpage.c
 screens/ui_wifipage.c
+screens/ui_netapp.c
 ui.c
 components/ui_comp_hook.c
 ui_helpers.c
@@ -18,5 +19,5 @@ images/ui_img_2114266571.c
 images/ui_img_613467726.c
 images/ui_img_499049799.c
 images/ui_img_1887403499.c
-fonts/ui_font_Terminal22.c
 fonts/ui_font_Terminal.c
+fonts/ui_font_Terminal22.c

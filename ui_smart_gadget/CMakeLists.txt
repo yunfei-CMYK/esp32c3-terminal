@@ -7,6 +7,7 @@ SET(SOURCES screens/ui_Startpage.c
     screens/ui_campasspage.c
     screens/ui_settingpage.c
     screens/ui_wifipage.c
+    screens/ui_netapp.c
     ui.c
     components/ui_comp_hook.c
     ui_helpers.c
@@ -18,9 +19,7 @@ SET(SOURCES screens/ui_Startpage.c
     images/ui_img_613467726.c
     images/ui_img_499049799.c
     images/ui_img_1887403499.c
-    fonts/ui_font_Terminal22.c
     fonts/ui_font_Terminal.c
-    fonts/font_myawesome.c)
+    fonts/ui_font_Terminal22.c)
 
 add_library(ui ${SOURCES})
-

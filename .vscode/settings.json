@@ -10,7 +10,8 @@
         "protocol_examples_common.h": "c",
         "uart.h": "c",
         "time.h": "c",
-        "qmc5883l.h": "c"
+        "qmc5883l.h": "c",
+        "qmi8658c.h": "c"
     },
     "workbench.colorCustomizations": {
         "tab.activeBackground": "#1a1a1b",

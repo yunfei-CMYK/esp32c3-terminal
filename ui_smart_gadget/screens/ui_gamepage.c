@@ -66,23 +66,14 @@ void game_update_cb(lv_timer_t *timer)
     ESP_LOGI(TAG, "mat_flag = %d,ball_dir = %d,mat_height = %d,strength = %d", mat_flag, ball_dir, mat_height, strength);
 }
 
+
 void ui_gamepage_screen_init(void)
 {
     ESP_LOGI(TAG, "游戏界面初始化");
-    // 创建一个界面对象
-    static lv_style_t style;
-    lv_style_init(&style);
-    lv_style_set_radius(&style, 10);
-    lv_style_set_bg_opa(&style, LV_OPA_COVER);
-    lv_style_set_bg_color(&style, lv_color_hex(0xcccccc));
-    lv_style_set_border_width(&style, 0);
-    lv_style_set_pad_all(&style, 0);
-    lv_style_set_width(&style, 320);
-    lv_style_set_height(&style, 240);
-
     ui_gamepage = lv_obj_create(NULL);
-    lv_obj_clear_flag(ui_gamepage, LV_OBJ_FLAG_SCROLLABLE); /// Flags
-    lv_obj_add_style(ui_gamepage, &style, 0);
+    lv_obj_clear_flag(ui_gamepage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_bg_color(ui_gamepage, lv_color_hex(0x5295B4), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_gamepage, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     // 创建一个垫子
     static lv_style_t mat_style;
@@ -106,7 +97,13 @@ void ui_gamepage_screen_init(void)
     lv_led_set_brightness(ball, 150);
     lv_led_set_color(ball, lv_palette_main(LV_PALETTE_DEEP_ORANGE));
     lv_obj_align_to(ball, mat, LV_ALIGN_OUT_TOP_MID, 0, 0);
-
+    // ui_Label13 = lv_label_create(ui_gamepage);
+    // lv_obj_set_width(ui_Label13, LV_SIZE_CONTENT);   /// 1
+    // lv_obj_set_height(ui_Label13, LV_SIZE_CONTENT);    /// 1
+    // lv_obj_set_align(ui_Label13, LV_ALIGN_CENTER);
+    // lv_label_set_text(ui_Label13, "游戏");
+    // lv_obj_set_style_text_font(ui_Label13, &ui_font_Terminal, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_gamepage, ui_event_gamepage, LV_EVENT_ALL, NULL);
+
 }

@@ -68,7 +68,6 @@ void ui_settingpage_screen_init(void)
     lv_obj_set_height(slider, 30);
     lv_obj_add_event_cb(slider, slider_event_cb, LV_EVENT_VALUE_CHANGED, NULL);
 
-
     lv_obj_add_event_cb(ui_settingpage, ui_event_settingpage, LV_EVENT_ALL, NULL);
 
 }

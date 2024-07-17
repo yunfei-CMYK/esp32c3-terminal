@@ -29,13 +29,13 @@ void att_update_cb(lv_timer_t * timer)
     ESP_LOGI(TAG,"att_led__x = %d,att_led_y = %d",att_led_x,att_led_y);
 }
 
+
 void ui_mpupage_screen_init(void)
 {
     ESP_LOGI(TAG,"姿态传感器初始化");
- 
 
     ui_mpupage = lv_obj_create(NULL);
-    lv_obj_clear_flag(ui_mpupage, LV_OBJ_FLAG_SCROLLABLE);      // Flags
+    lv_obj_clear_flag(ui_mpupage, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
     lv_obj_set_style_bg_color(ui_mpupage, lv_color_hex(0x5295B4), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_mpupage, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
@@ -64,7 +64,12 @@ void ui_mpupage_screen_init(void)
     lv_obj_set_style_text_font(att_y_label, &lv_font_montserrat_20, 0);
     lv_obj_set_style_text_color(att_y_label, lv_color_hex(0xffffff), 0);
     lv_obj_align(att_y_label, LV_ALIGN_TOP_RIGHT, -20, 20);
-
+    // ui_Label15 = lv_label_create(ui_mpupage);
+    // lv_obj_set_width(ui_Label15, LV_SIZE_CONTENT);   /// 1
+    // lv_obj_set_height(ui_Label15, LV_SIZE_CONTENT);    /// 1
+    // lv_obj_set_align(ui_Label15, LV_ALIGN_CENTER);
+    // lv_label_set_text(ui_Label15, "陀螺仪");
+    // lv_obj_set_style_text_font(ui_Label15, &ui_font_Terminal, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_obj_add_event_cb(ui_mpupage, ui_event_mpupage, LV_EVENT_ALL, NULL);
 
