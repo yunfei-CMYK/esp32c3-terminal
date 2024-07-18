@@ -23,7 +23,6 @@ extern "C" {
 #include "esp_wifi.h"
 #include "esp_log.h"
 #include "esp_event.h"
-
 #include "math.h"
 
 #include "string.h"
@@ -39,6 +38,16 @@ extern "C" {
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
+
+#include "protocol_examples_common.h"
+#include "esp_netif_sntp.h"
+#include "lwip/ip_addr.h"
+#include "esp_sntp.h"
+#include "esp_sleep.h"
+#include "esp_attr.h"
+#include <time.h>
+#include "sys/time.h"
+
 
 typedef enum{
     start_page,
@@ -59,7 +68,7 @@ extern menustate screen_state;
 extern int strength;
 extern float bg_duty;
 extern lv_timer_t *my_lv_timer;
-extern bool wifiswitch_flag;
+// extern bool wifiswitch_flag;
 
 void showanim_Animation(lv_obj_t * TargetObject, int delay);
 // SCREEN: ui_Startpage
@@ -171,7 +180,10 @@ extern lv_obj_t * ui_wifiKeyboard;
 void ui_netapp_screen_init(void);
 void ui_event_netapp(lv_event_t * e);
 extern lv_obj_t * ui_netapp;
-extern lv_obj_t * ui_netapptitle;
+extern lv_obj_t * ui_switchtitle;
+extern lv_obj_t * ui_netswitch;
+extern lv_obj_t * ui_currenttimelabel;
+extern lv_obj_t * ui_currentweather;
 extern lv_obj_t * ui____initial_actions0;
 
 

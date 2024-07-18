@@ -28,6 +28,12 @@ dependencies:
       storage_url: file:///E:/Software/Espressif/registry
       type: service
     version: 8.3.11
-manifest_hash: 800661f7347229110c1e85445cb2c72b99c72ab3b6f752e0a849d147cc162bdd
+  protocol_examples_common:
+    component_hash: null
+    source:
+      path: E:\Software\Espressif\frameworks\esp-idf-v5.2.1\examples\common_components\protocol_examples_common
+      type: local
+    version: '*'
+manifest_hash: c92553c264550c757733ba777f940bcb267e66b699b9bcf753e56bd9bf3a9fd3
 target: esp32c3
 version: 1.0.0

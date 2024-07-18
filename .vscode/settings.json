@@ -7,6 +7,7 @@
         "ui.h": "c",
         "esp_system.h": "c",
         "ip_addr.h": "c",
+        "esp_netif_sntp.h": "c",
         "protocol_examples_common.h": "c",
         "uart.h": "c",
         "time.h": "c",

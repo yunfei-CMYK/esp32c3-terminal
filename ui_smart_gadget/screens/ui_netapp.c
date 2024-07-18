@@ -7,21 +7,192 @@
 
 static const char *TAG = "NET";
 
+#define CONFIG_SNTP_TIME_SERVER "pool.ntp.org"
+#define INET6_ADDRSTRLEN 48
+RTC_DATA_ATTR static int boot_count = 0;
+
+
+static void obtain_time(void);
+
+void time_sync_notification_cb(struct timeval *tv)
+{
+    ESP_LOGI(TAG, "Notification of a time synchronization event");
+}
+
+static void print_servers(void)
+{
+    ESP_LOGI(TAG, "List of configured NTP servers:");
+
+    for (uint8_t i = 0; i < SNTP_MAX_SERVERS; ++i){
+        if (esp_sntp_getservername(i)){
+            ESP_LOGI(TAG, "server %d: %s", i, esp_sntp_getservername(i));
+        } else {
+            // we have either IPv4 or IPv6 address, let's print it
+            char buff[INET6_ADDRSTRLEN];
+            ip_addr_t const *ip = esp_sntp_getserver(i);
+            if (ipaddr_ntoa_r(ip, buff, INET6_ADDRSTRLEN) != NULL)
+                ESP_LOGI(TAG, "server %d: %s", i, buff);
+        }
+    }
+}
+
+void get_time(void){
+    ++boot_count;
+    ESP_LOGI(TAG, "Boot count: %d", boot_count);
+
+    time_t now;
+        struct tm timeinfo;
+    time(&now);
+    localtime_r(&now, &timeinfo);
+    // Is time set? If not, tm_year will be (1970 - 1900).
+    if (timeinfo.tm_year < (2016 - 1900)) {
+        ESP_LOGI(TAG, "Time is not set yet. Connecting to WiFi and getting time over NTP.");
+        obtain_time();
+        // update 'now' variable with current time
+        time(&now);
+    }
+    char strftime_buf[64];
+
+    // Set timezone to Eastern Standard Time and print local time
+    setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
+    tzset();
+    localtime_r(&now, &timeinfo);
+    strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+    ESP_LOGI(TAG, "The current date/time in New York is: %s", strftime_buf);
+
+    // Set timezone to China Standard Time
+    setenv("TZ", "CST-8", 1);
+    tzset();
+    localtime_r(&now, &timeinfo);
+    strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
+    ESP_LOGI(TAG, "The current date/time in Shanghai is: %s", strftime_buf);
+    lv_label_set_text(ui_currenttimelabel, strftime_buf);
+
+    if (sntp_get_sync_mode() == SNTP_SYNC_MODE_SMOOTH) {
+        struct timeval outdelta;
+        while (sntp_get_sync_status() == SNTP_SYNC_STATUS_IN_PROGRESS) {
+            adjtime(NULL, &outdelta);
+            ESP_LOGI(TAG, "Waiting for adjusting time ... outdelta = %jd sec: %li ms: %li us",
+                        (intmax_t)outdelta.tv_sec,
+                        outdelta.tv_usec/1000,
+                        outdelta.tv_usec%1000);
+            vTaskDelay(2000 / portTICK_PERIOD_MS);
+        }
+    }
+
+    const int delay_sec = 10;
+    ESP_LOGI(TAG, "Waiting for %d seconds before continuing", delay_sec);
+    vTaskDelay(delay_sec * 1000 / portTICK_PERIOD_MS);
+
+    // const int deep_sleep_sec = 10;
+    // ESP_LOGI(TAG, "Entering deep sleep for %d seconds", deep_sleep_sec);
+    // esp_deep_sleep(1000000LL * deep_sleep_sec);
+}
+
+static void ui_event_netswitch(lv_event_t *e)
+{
+    /* 检查事件类型 */
+    lv_event_code_t eventcode = lv_event_get_code(e);
+    if (eventcode == LV_EVENT_CLICKED)
+    {
+        lv_obj_t *netsw = lv_event_get_target(e);
+        if (lv_obj_has_state(netsw, LV_STATE_CHECKED))
+        {
+            ESP_LOGI(TAG, "WIFI已打开");
+            get_time();           
+        }
+        else
+        {
+            ESP_LOGI(TAG, "WIFI已关闭");
+            lv_label_set_text(ui_currenttimelabel,"");
+        }
+    }
+}
+
 void ui_netapp_screen_init(void)
 {
     ESP_LOGI(TAG, "网络应用界面初始化");
+
+    ESP_ERROR_CHECK( nvs_flash_init() );
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
     ui_netapp = lv_obj_create(NULL);
-    lv_obj_clear_flag(ui_netapp, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_clear_flag(ui_netapp, LV_OBJ_FLAG_SCROLLABLE); /// Flags
     lv_obj_set_style_bg_color(ui_netapp, lv_color_hex(0x5295B4), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(ui_netapp, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_netapptitle = lv_label_create(ui_netapp);
-    lv_obj_set_width(ui_netapptitle, LV_SIZE_CONTENT);   /// 1
-    lv_obj_set_height(ui_netapptitle, LV_SIZE_CONTENT);    /// 1
-    lv_obj_set_align(ui_netapptitle, LV_ALIGN_CENTER);
-    lv_label_set_text(ui_netapptitle, "NetApp");
-    lv_obj_set_style_text_font(ui_netapptitle, &ui_font_Terminal, LV_PART_MAIN | LV_STATE_DEFAULT);
+    ui_switchtitle = lv_label_create(ui_netapp);
+    lv_obj_set_width(ui_switchtitle, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_switchtitle, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_switchtitle, -118);
+    lv_obj_set_y(ui_switchtitle, -95);
+    lv_obj_set_align(ui_switchtitle, LV_ALIGN_CENTER);
+    lv_label_set_text(ui_switchtitle, "WIFI:");
+    lv_obj_set_style_text_font(ui_switchtitle, &ui_font_Terminal, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_netswitch = lv_switch_create(ui_netapp);
+    lv_obj_set_width(ui_netswitch, 50);
+    lv_obj_set_height(ui_netswitch, 25);
+    lv_obj_set_x(ui_netswitch, -74);
+    lv_obj_set_y(ui_netswitch, -95);
+    lv_obj_set_align(ui_netswitch, LV_ALIGN_CENTER);
+
+    lv_obj_add_event_cb(ui_netswitch, ui_event_netswitch, LV_EVENT_ALL, NULL);
+
+    ui_currenttimelabel = lv_label_create(ui_netapp);
+    lv_obj_set_width(ui_currenttimelabel, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_currenttimelabel, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_currenttimelabel, -50);
+    lv_obj_set_y(ui_currenttimelabel, -54);
+    lv_obj_set_align(ui_currenttimelabel, LV_ALIGN_CENTER);
+
+    ui_currentweather = lv_label_create(ui_netapp);
+    lv_obj_set_width(ui_currentweather, LV_SIZE_CONTENT);  /// 1
+    lv_obj_set_height(ui_currentweather, LV_SIZE_CONTENT); /// 1
+    lv_obj_set_x(ui_currentweather, -115);
+    lv_obj_set_y(ui_currentweather, -22);
+    lv_obj_set_align(ui_currentweather, LV_ALIGN_CENTER);
 
     lv_obj_add_event_cb(ui_netapp, ui_event_netapp, LV_EVENT_ALL, NULL);
+    
+}
+
+static void obtain_time(void)
+{
+    // 连接WiFi或以太网
+    ESP_ERROR_CHECK(example_connect());
+
+
+    // 初始化SNTP功能
+    ESP_LOGI(TAG, "Initializing SNTP");
+    esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG(CONFIG_SNTP_TIME_SERVER);
+    
+    config.sync_cb = NULL; // 这里可以设置同步完成的回调函数
+    esp_netif_sntp_init(&config);
+
+    print_servers();
+
+
+    // 启动SNTP
+    ESP_LOGI(TAG, "Starting SNTP");
+    // esp_netif_sntp_start();
+
+    // 等待时间同步完成
+    time_t now = 0;
+    struct tm timeinfo = { 0 };
+    const int retry_count = 15;
+    int retry = 0;
+    while (esp_netif_sntp_sync_wait(2000 / portTICK_PERIOD_MS) == ESP_ERR_TIMEOUT && ++retry < retry_count) {
+        ESP_LOGI(TAG, "Waiting for system time to be set... (%d/%d)", retry, retry_count);
+    }
+
+    // 获取当前时间
+    time(&now);
+    localtime_r(&now, &timeinfo);
+
+    // 断开连接并关闭SNTP
+    ESP_ERROR_CHECK( example_disconnect() );
+    esp_netif_sntp_deinit();
 
 }

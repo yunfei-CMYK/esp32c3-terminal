@@ -130,7 +130,10 @@ lv_obj_t * ui_wifiKeyboard;
 void ui_netapp_screen_init(void);
 void ui_event_netapp(lv_event_t * e);
 lv_obj_t * ui_netapp;
-lv_obj_t * ui_netapptitle;
+lv_obj_t * ui_switchtitle;
+lv_obj_t * ui_netswitch;
+lv_obj_t * ui_currenttimelabel;
+lv_obj_t * ui_currentweather;
 lv_obj_t * ui____initial_actions0;
 
 ///////////////////// TEST LVGL SETTINGS ////////////////////
@@ -190,12 +193,11 @@ void ui_event_Startpage(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
-    // if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_BOTTOM) {
-    //     lv_indev_wait_release(lv_indev_get_act());
-    //     _ui_screen_change(&ui_netapp, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_netapp_screen_init);
-    // }
-    if(event_code == LV_EVENT_LONG_PRESSED) {
-        _ui_screen_change(&ui_netapp, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_netapp_screen_init);
+    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_BOTTOM) {
+        lv_indev_wait_release(lv_indev_get_act());
+        _ui_screen_change(&ui_netapp, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_netapp_screen_init);
+        screen_state = netapp_page;
+        ESP_LOGI(STATE, "%d 是网络应用界面", screen_state);
     }
     if(event_code == LV_EVENT_SCREEN_LOAD_START) {
         // because there is a bug here,use showanim_Animation(ui_MainTile, 100) every time，screen will be blink
@@ -427,19 +429,12 @@ void ui_event_netapp(lv_event_t * e)
 {
     lv_event_code_t event_code = lv_event_get_code(e);
     lv_obj_t * target = lv_event_get_target(e);
-    // if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_TOP) {
-    //     lv_indev_wait_release(lv_indev_get_act());
-    //     _ui_screen_change(&ui_Startpage, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_Startpage_screen_init);
-    //     screen_state = start_page;
-    //     ESP_LOGI(STATE, "%d 是开始界面", screen_state);
-    // }
-    if(event_code == LV_EVENT_LONG_PRESSED) {
-        _ui_screen_change(&ui_Startpage, LV_SCR_LOAD_ANIM_FADE_ON, 500, 0, &ui_Startpage_screen_init);
+
+    if(event_code == LV_EVENT_GESTURE &&  lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_TOP) {
+        lv_indev_wait_release(lv_indev_get_act());
+        _ui_screen_change(&ui_Startpage, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_Startpage_screen_init);
         screen_state = start_page;
         ESP_LOGI(STATE, "%d 是开始界面", screen_state);
-    }
-    if(event_code == LV_EVENT_SCREEN_LOAD_START) {
-        showanim_Animation(ui_netapptitle, 200);
     }
 }
 
