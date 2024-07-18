@@ -136,6 +136,24 @@ lv_obj_t * ui_currenttimelabel;
 lv_obj_t * ui_currentweather;
 lv_obj_t * ui____initial_actions0;
 
+lv_obj_t * label_wifi;
+lv_obj_t * label_sntp;
+lv_obj_t * label_weather;
+
+lv_obj_t * qweather_icon_label;
+lv_obj_t * qweather_temp_label;
+lv_obj_t * qweather_text_label;
+lv_obj_t * qair_level_obj;
+lv_obj_t * qair_level_label;
+lv_obj_t * led_time_label;
+lv_obj_t * week_label;
+lv_obj_t * sunset_label;
+lv_obj_t *indoor_temp_label;
+lv_obj_t *indoor_humi_label;
+lv_obj_t *outdoor_temp_label;
+lv_obj_t *outdoor_humi_label;
+lv_obj_t * date_label;
+
 ///////////////////// TEST LVGL SETTINGS ////////////////////
 #if LV_COLOR_DEPTH != 16
     #error "LV_COLOR_DEPTH should be 16bit to match SquareLine Studio's settings"
@@ -198,6 +216,26 @@ void ui_event_Startpage(lv_event_t * e)
         _ui_screen_change(&ui_netapp, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 500, 0, &ui_netapp_screen_init);
         screen_state = netapp_page;
         ESP_LOGI(STATE, "%d 是网络应用界面", screen_state);
+
+        if(reset_flag == 1)
+        {
+            lv_gui_start();
+
+            ESP_LOGI(TAG,"创建连接WIFI任务");
+            xTaskCreate(wifi_connect_task, "wifi_connect_task", 8192, NULL, 5, NULL);   // 一次性任务   连接WIFI
+            ESP_LOGI(TAG,"创建获取网络时间的任务");
+            xTaskCreate(get_time_task, "get_time_task", 8192, NULL, 5, NULL);           // 一次性任务   获取网络时间
+            ESP_LOGI(TAG,"创建获取每日天气任务");
+            xTaskCreate(get_dwather_task, "get_dwather_task", 8192, NULL, 5, NULL);     // 一次性任务   获取每日天气信息
+            ESP_LOGI(TAG,"创建获取实时天气任务");
+            xTaskCreate(get_rtweather_task, "get_rtweather_task", 8192, NULL, 5, NULL); // 一次性任务   获取实时天气信息
+            ESP_LOGI(TAG,"创建获取实时空气质量任务");
+            xTaskCreate(get_airq_task, "get_airq_task", 8192, NULL, 5, NULL);           // 一次性任务   获取实时空气质量
+            ESP_LOGI(TAG, "创建获取温湿度的任务");
+            xTaskCreate(get_th_task, "get_th_task", 4096, NULL, 5, NULL);               // 非一次性任务   获取温湿度
+            ESP_LOGI(TAG,"创建主界面任务");
+            xTaskCreate(weathermain_page_task, "weathermain_page_task", 8192, NULL, 5, NULL);         // 非一次性任务 主界面任务
+        }
     }
     if(event_code == LV_EVENT_SCREEN_LOAD_START) {
         // because there is a bug here,use showanim_Animation(ui_MainTile, 100) every time，screen will be blink
@@ -435,6 +473,8 @@ void ui_event_netapp(lv_event_t * e)
         _ui_screen_change(&ui_Startpage, LV_SCR_LOAD_ANIM_MOVE_TOP, 500, 0, &ui_Startpage_screen_init);
         screen_state = start_page;
         ESP_LOGI(STATE, "%d 是开始界面", screen_state);
+        // lv_timer_del(my_lv_timer);
+        // ESP_LOGI(TAG, "删除网络天气参数更新定时器");
     }
 }
 

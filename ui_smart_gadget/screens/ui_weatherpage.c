@@ -68,6 +68,11 @@ void get_th_task(void *args)
             break;
             ESP_LOGI(TAG,"返回功能界面");
         }
+        if(screen_state == start_page)\
+        {
+            break;
+            ESP_LOGI(TAG,"返回开始界面");
+        }
     }
     vTaskDelete(NULL);
     ESP_LOGI(TAG,"温湿度任务删除");

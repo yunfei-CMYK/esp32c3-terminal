@@ -19,6 +19,12 @@ SET(SOURCES screens/ui_Startpage.c
     images/ui_img_613467726.c
     images/ui_img_499049799.c
     images/ui_img_1887403499.c
+#   images/image_taikong.c
+    fonts/font_alipuhui.c
+    fonts/desktopweather.c
+    fonts/font_led.c
+    fonts/myawesome.c
+    fonts/qweather.c
     fonts/ui_font_Terminal.c
     fonts/ui_font_Terminal22.c)
 

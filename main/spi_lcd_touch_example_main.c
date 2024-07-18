@@ -156,8 +156,26 @@ static void main_page_task(void *pvParameters)
 
 void app_main(void)
 {
+    // 初始化NVS
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+      ESP_ERROR_CHECK(nvs_flash_erase());
+      ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
+    // 初始化I2C
     ESP_ERROR_CHECK(i2c_master_init());
     ESP_LOGI(TAG, "I2C initialized successfully");
+
+    // 检查温湿度芯片
+    ret = gxhtc3_read_id();
+    while(ret != ESP_OK)
+    {
+         ret = gxhtc3_read_id();
+         ESP_LOGI(TAG,"GXHTC3 READ ID");
+         vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
 
     static lv_disp_draw_buf_t disp_buf; // contains internal graphic buffer(s) called draw buffer(s)
     static lv_disp_drv_t disp_drv;      // contains callback functions

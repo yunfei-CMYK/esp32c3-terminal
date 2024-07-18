@@ -11,6 +11,11 @@ dependencies:
       storage_url: file:///E:/Software/Espressif/registry
       type: service
     version: 1.1.1
+  espressif/zlib:
+    component_hash: 999ec50086ac1c82b8321d8f540dc9fd10f5622948b935558aa16b4b66e95d9d
+    source:
+      type: service
+    version: 1.3.0
   espressif__esp_lcd_touch_ft5x06:
     component_hash: null
     source:
@@ -34,6 +39,6 @@ dependencies:
       path: E:\Software\Espressif\frameworks\esp-idf-v5.2.1\examples\common_components\protocol_examples_common
       type: local
     version: '*'
-manifest_hash: c92553c264550c757733ba777f940bcb267e66b699b9bcf753e56bd9bf3a9fd3
+manifest_hash: cc820f15bfb9aa3cdacd0ba833df907d87a1aacc366d92139fb4785937541f33
 target: esp32c3
 version: 1.0.0

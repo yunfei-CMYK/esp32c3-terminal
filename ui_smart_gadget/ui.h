@@ -40,14 +40,23 @@ extern "C" {
 #include "lwip/sys.h"
 
 #include "protocol_examples_common.h"
+#include "protocol_examples_utils.h"
 #include "esp_netif_sntp.h"
 #include "lwip/ip_addr.h"
 #include "esp_sntp.h"
-#include "esp_sleep.h"
 #include "esp_attr.h"
 #include <time.h>
 #include "sys/time.h"
 
+#include <sys/param.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include "esp_tls.h"
+#include "esp_crt_bundle.h"
+#include "esp_http_client.h"
+#include "cJSON.h"
+#include "zlib.h"
+#include "examples/libs/lv_example_libs.h"
 
 typedef enum{
     start_page,
@@ -179,12 +188,70 @@ extern lv_obj_t * ui_wifiKeyboard;
 // SCREEN: ui_netapp
 void ui_netapp_screen_init(void);
 void ui_event_netapp(lv_event_t * e);
+
+void wifi_connect_task(void *pvParameters);
+void get_time_task(void *pvParameters);
+void get_dwather_task(void *pvParameters);
+void get_rtweather_task(void *pvParameters);
+void get_airq_task(void *pvParameters);
+void weathermain_page_task(void *pvParameters);
+
+extern void lv_gui_start(void); 
+extern void lv_main_page(void);
+extern void lv_qweather_icon_show(void);
+extern void lv_week_show(void);
+extern void lv_qair_level_show(void);
+
+extern void lv_main_page(void);
+
+
+
 extern lv_obj_t * ui_netapp;
 extern lv_obj_t * ui_switchtitle;
 extern lv_obj_t * ui_netswitch;
 extern lv_obj_t * ui_currenttimelabel;
 extern lv_obj_t * ui_currentweather;
 extern lv_obj_t * ui____initial_actions0;
+
+extern lv_obj_t * label_wifi;
+extern lv_obj_t * label_sntp;
+extern lv_obj_t * label_weather;
+extern lv_obj_t * qweather_icon_label;
+extern lv_obj_t * qweather_temp_label;
+extern lv_obj_t * qweather_text_label;
+extern lv_obj_t * qair_level_obj;
+extern lv_obj_t * qair_level_label;
+extern lv_obj_t * led_time_label;
+extern lv_obj_t * week_label;
+extern lv_obj_t * sunset_label;
+extern lv_obj_t *indoor_temp_label;
+extern lv_obj_t *indoor_humi_label;
+extern lv_obj_t *outdoor_temp_label;
+extern lv_obj_t *outdoor_humi_label;
+extern lv_obj_t * date_label;
+
+
+extern float temp, humi;
+
+extern time_t now;
+extern struct tm timeinfo;
+
+extern int reset_flag;
+
+extern int temp_value, humi_value;
+
+extern int qwnow_temp; // 实时天气温度
+extern int qwnow_humi; // 实时天气湿度
+extern int qwnow_icon; // 实时天气图标
+extern char qwnow_text[32]; // 实时天气状态
+
+extern int qwdaily_tempMax;       // 当天最高温度
+extern int qwdaily_tempMin;       // 当天最低温度
+extern char qwdaily_sunrise[10];  // 当天日出时间
+extern char qwdaily_sunset[10];   // 当天日落时间
+
+extern int qanow_level;       // 实时空气质量等级
+
 
 
 LV_IMG_DECLARE(ui_img_wifi_png);    // assets/Wifi.png
@@ -194,12 +261,18 @@ LV_IMG_DECLARE(ui_img_2114266571);    // assets/串口监视器.png
 LV_IMG_DECLARE(ui_img_613467726);    // assets/旋转.png
 LV_IMG_DECLARE(ui_img_499049799);    // assets/陀螺仪完整.png
 LV_IMG_DECLARE(ui_img_1887403499);    // assets/设置.png
+// LV_IMG_DECLARE(image_taikong);
 
 
 
 LV_FONT_DECLARE(ui_font_Terminal);
 LV_FONT_DECLARE(ui_font_Terminal22);
+LV_FONT_DECLARE(font_alipuhui);
+LV_FONT_DECLARE(font_desktopweather);
+LV_FONT_DECLARE(font_led);
 LV_FONT_DECLARE(font_myawesome);
+LV_FONT_DECLARE(font_qweather);
+
 
 
 void ui_init(void);
