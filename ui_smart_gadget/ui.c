@@ -239,19 +239,19 @@ void ui_event_Mainpage(lv_event_t * e)
         ESP_LOGI(STATE, "%d 是开始界面", screen_state);
     }
     if(event_code == LV_EVENT_SCREEN_LOAD_START) {
-        showanim_Animation(ui_weather, 200);
-        showanim_Animation(ui_game, 200);
-        showanim_Animation(ui_port, 200);
-        showanim_Animation(ui_mpu, 400);
-        showanim_Animation(ui_campass, 400);
-        showanim_Animation(ui_setting, 400);
-        showanim_Animation(ui_functionmenutitle, 50);
-        showanim_Animation(ui_settinglabel, 400);
-        showanim_Animation(ui_campasslabel, 400);
-        showanim_Animation(ui_mpulabel, 400);
-        showanim_Animation(ui_voicelabel, 200);
-        showanim_Animation(ui_gamelabel, 200);
-        showanim_Animation(ui_weatherlabel, 200);
+        showanim_Animation(ui_weather, 100);
+        showanim_Animation(ui_game, 100);
+        showanim_Animation(ui_port, 100);
+        showanim_Animation(ui_mpu, 100);
+        showanim_Animation(ui_campass, 100);
+        showanim_Animation(ui_setting, 100);
+        showanim_Animation(ui_functionmenutitle, 100);
+        showanim_Animation(ui_settinglabel, 100);
+        showanim_Animation(ui_campasslabel, 100);
+        showanim_Animation(ui_mpulabel, 100);
+        showanim_Animation(ui_voicelabel, 100);
+        showanim_Animation(ui_gamelabel, 100);
+        showanim_Animation(ui_weatherlabel, 100);
     }
 }
 void ui_event_weather(lv_event_t * e)

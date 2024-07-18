@@ -2,6 +2,9 @@
 
 This example demonstrates how to use LVGL on ESP32-C3.
 
+---
+## Introduction
+
 参考链接：https://lceda001.feishu.cn/wiki/Xqx3wH8wMi3BrrkmeTXcgLL7nQk
 
 ## Hardware
